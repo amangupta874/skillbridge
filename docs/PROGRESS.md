@@ -1,6 +1,6 @@
 # PROGRESS (the agent updates this file at the end of every task and every day)
 
-Last verified: 2026-11-02, npm run verify green        Live URL: (fill after D6)        API URL: (fill after D6)        Repo: (fill on D1)
+Last verified: 2026-11-02, npm run verify green        Live URL: (fill after D6)        API URL: (fill after D6)        Repo: https://github.com/amangupta874/skillbridge
 
 ## Status by day (tick when DONE per docs/10 "Done when")
 - [x] D1 setup, database, repository      - [ ] D2 auth backend              - [ ] D3 helpers, lookups, skills, client foundation
