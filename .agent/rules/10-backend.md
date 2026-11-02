@@ -1,0 +1,12 @@
+# Backend rules (applies when editing files under server/)
+- ES modules, `.js` extension in every relative import. No TypeScript. No `require`.
+- Flow: route -> validate(zod) -> controller -> service -> prisma. Services never see `req`/`res`; controllers never import Prisma.
+- Throw `AppError` helpers (`badRequest`, `unauthorized`, `forbidden`, `notFound`, `conflict`); never hand-build error JSON; never swallow errors.
+- Authorisation lives in services. Check order: 404 (not found / hidden) -> 403 (wrong actor) -> 409 (illegal state or conflict).
+- Responses via `sendData` / `sendPage`. DTO shapes are in docs/05_API_SPEC.md; return exactly those fields (use `select`), never `passwordHash`, never other users' emails.
+- Multi-step writes use `prisma.$transaction(async (tx) => ...)` and `tx` everywhere inside. Accepting an application uses the `SELECT ... FOR UPDATE` pattern from docs/06.
+- Derived data is never stored (team size, full flag, notification text, match score).
+- Every route has a zod schema `z.object({ body, query, params })`; unknown fields are stripped; page size max 50.
+- Logging: use the shared `logger` or `req.log`; never log passwords, cookies, tokens or request bodies.
+- Tests: Vitest + Supertest on the real app and test DB, `beforeEach(resetDatabase)`. Each endpoint: happy path, validation, 401, wrong actor, conflict.
+- Comments explain WHY. Clear names. Functions under about 40 lines.

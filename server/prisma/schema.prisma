@@ -1,0 +1,276 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ProjectStatus {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum ExchangeStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+enum LinkType {
+  GITHUB
+  LINKEDIN
+  PORTFOLIO
+  OTHER
+}
+
+enum NotificationType {
+  APPLICATION_RECEIVED
+  APPLICATION_ACCEPTED
+  APPLICATION_REJECTED
+  EXCHANGE_RECEIVED
+  EXCHANGE_ACCEPTED
+  EXCHANGE_REJECTED
+  EXCHANGE_COMPLETED
+}
+
+model College {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+  @@map("colleges")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  bio          String?
+  weeklyHours  Int?     @map("weekly_hours")
+  collegeId    Int?     @map("college_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  college           College?             @relation(fields: [collegeId], references: [id])
+  links             UserLink[]
+  sessions          Session[]
+  skills            UserSkill[]
+  learningGoals     UserLearningGoal[]
+  interests         UserInterest[]
+  ownedProjects     Project[]            @relation("ProjectOwner")
+  applications      ProjectApplication[]
+  memberships       ProjectMember[]
+  sentExchanges     SkillExchange[]      @relation("ExchangeSender")
+  receivedExchanges SkillExchange[]      @relation("ExchangeRecipient")
+  notifications     Notification[]
+  @@map("users")
+}
+
+model UserLink {
+  userId String   @map("user_id")
+  type   LinkType @map("link_type")
+  url    String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([userId, type])
+  @@map("user_links")
+}
+
+model Session {
+  id        String   @id   // SHA-256 hash of the cookie token, never the raw token
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model SkillCategory {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  skills Skill[]
+  @@map("skill_categories")
+}
+
+model Skill {
+  id         Int           @id @default(autoincrement())
+  name       String        @unique
+  categoryId Int           @map("category_id")
+  category   SkillCategory @relation(fields: [categoryId], references: [id])
+  aliases            SkillAlias[]
+  userSkills         UserSkill[]
+  learningGoals      UserLearningGoal[]
+  projectSkills      ProjectSkill[]
+  offeredExchanges   SkillExchange[] @relation("OfferedSkill")
+  requestedExchanges SkillExchange[] @relation("RequestedSkill")
+  @@map("skills")
+}
+
+model SkillAlias {
+  alias   String @id   // lower case, e.g. "nodejs" maps to Node.js
+  skillId Int    @map("skill_id")
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  @@map("skill_aliases")
+}
+
+model UserSkill {
+  userId  String @map("user_id")
+  skillId Int    @map("skill_id")
+  level   Level
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill   Skill  @relation(fields: [skillId], references: [id])
+  @@id([userId, skillId])
+  @@index([skillId])
+  @@map("user_skills")
+}
+
+model UserLearningGoal {
+  userId  String @map("user_id")
+  skillId Int    @map("skill_id")
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill   Skill  @relation(fields: [skillId], references: [id])
+  @@id([userId, skillId])
+  @@index([skillId])
+  @@map("user_learning_goals")
+}
+
+model Interest {
+  id    Int            @id @default(autoincrement())
+  name  String         @unique
+  users UserInterest[]
+  @@map("interests")
+}
+
+model UserInterest {
+  userId     String   @map("user_id")
+  interestId Int      @map("interest_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interest   Interest @relation(fields: [interestId], references: [id])
+  @@id([userId, interestId])
+  @@map("user_interests")
+}
+
+model ProjectCategory {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  projects Project[]
+  @@map("project_categories")
+}
+
+model Project {
+  id           String        @id @default(uuid())
+  ownerId      String        @map("owner_id")
+  categoryId   Int           @map("category_id")
+  title        String
+  description  String
+  difficulty   Level
+  status       ProjectStatus @default(DRAFT)
+  maxTeamSize  Int           @map("max_team_size")   // includes the owner
+  hoursPerWeek Int?          @map("hours_per_week")
+  deadline     DateTime?
+  githubUrl    String?       @map("github_url")
+  demoUrl      String?       @map("demo_url")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  owner        User                 @relation("ProjectOwner", fields: [ownerId], references: [id])
+  category     ProjectCategory      @relation(fields: [categoryId], references: [id])
+  skills       ProjectSkill[]
+  applications ProjectApplication[]
+  members      ProjectMember[]
+  @@index([status, categoryId])
+  @@index([ownerId])
+  @@map("projects")
+}
+
+model ProjectSkill {
+  projectId String  @map("project_id")
+  skillId   Int     @map("skill_id")
+  minLevel  Level   @default(BEGINNER) @map("min_level")
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  skill     Skill   @relation(fields: [skillId], references: [id])
+  @@id([projectId, skillId])
+  @@index([skillId])
+  @@map("project_skills")
+}
+
+model ProjectApplication {
+  id          String            @id @default(uuid())
+  projectId   String            @map("project_id")
+  applicantId String            @map("applicant_id")
+  message     String
+  status      ApplicationStatus @default(PENDING)
+  createdAt   DateTime          @default(now()) @map("created_at")
+  decidedAt   DateTime?         @map("decided_at")
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  applicant     User           @relation(fields: [applicantId], references: [id])
+  notifications Notification[]
+  @@unique([projectId, applicantId])
+  @@index([projectId, status])
+  @@index([applicantId])
+  @@map("project_applications")
+}
+
+model ProjectMember {
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+  @@id([projectId, userId])
+  @@index([userId])
+  @@map("project_members")
+}
+
+model SkillExchange {
+  id               String         @id @default(uuid())
+  senderId         String         @map("sender_id")
+  recipientId      String         @map("recipient_id")
+  offeredSkillId   Int            @map("offered_skill_id")
+  requestedSkillId Int            @map("requested_skill_id")
+  message          String
+  status           ExchangeStatus @default(PENDING)
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  sender         User           @relation("ExchangeSender", fields: [senderId], references: [id])
+  recipient      User           @relation("ExchangeRecipient", fields: [recipientId], references: [id])
+  offeredSkill   Skill          @relation("OfferedSkill", fields: [offeredSkillId], references: [id])
+  requestedSkill Skill          @relation("RequestedSkill", fields: [requestedSkillId], references: [id])
+  notifications  Notification[]
+  @@index([recipientId, status])
+  @@index([senderId, status])
+  @@map("skill_exchanges")
+}
+
+model Notification {
+  id            String           @id @default(uuid())
+  recipientId   String           @map("recipient_id")
+  type          NotificationType
+  applicationId String?          @map("application_id")
+  exchangeId    String?          @map("exchange_id")
+  isRead        Boolean          @default(false) @map("is_read")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  recipient   User                @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  application ProjectApplication? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  exchange    SkillExchange?      @relation(fields: [exchangeId], references: [id], onDelete: Cascade)
+  @@index([recipientId, isRead, createdAt])
+  @@map("notifications")
+}

@@ -1,0 +1,497 @@
+{
+  "skillCategories": [
+    {
+      "name": "Programming Languages",
+      "skills": [
+        {
+          "name": "JavaScript",
+          "aliases": [
+            "js",
+            "ecmascript"
+          ]
+        },
+        {
+          "name": "TypeScript",
+          "aliases": [
+            "ts"
+          ]
+        },
+        {
+          "name": "Python",
+          "aliases": [
+            "py"
+          ]
+        },
+        {
+          "name": "Java",
+          "aliases": []
+        },
+        {
+          "name": "C++",
+          "aliases": [
+            "cpp",
+            "cplusplus"
+          ]
+        },
+        {
+          "name": "C",
+          "aliases": []
+        },
+        {
+          "name": "C#",
+          "aliases": [
+            "csharp"
+          ]
+        },
+        {
+          "name": "Go",
+          "aliases": [
+            "golang"
+          ]
+        },
+        {
+          "name": "Rust",
+          "aliases": []
+        },
+        {
+          "name": "Kotlin",
+          "aliases": []
+        },
+        {
+          "name": "Swift",
+          "aliases": []
+        },
+        {
+          "name": "Dart",
+          "aliases": []
+        },
+        {
+          "name": "PHP",
+          "aliases": []
+        }
+      ]
+    },
+    {
+      "name": "Frontend",
+      "skills": [
+        {
+          "name": "HTML",
+          "aliases": [
+            "html5"
+          ]
+        },
+        {
+          "name": "CSS",
+          "aliases": [
+            "css3"
+          ]
+        },
+        {
+          "name": "React",
+          "aliases": [
+            "reactjs",
+            "react.js"
+          ]
+        },
+        {
+          "name": "Next.js",
+          "aliases": [
+            "nextjs",
+            "next"
+          ]
+        },
+        {
+          "name": "Vue.js",
+          "aliases": [
+            "vue",
+            "vuejs"
+          ]
+        },
+        {
+          "name": "Angular",
+          "aliases": [
+            "angularjs"
+          ]
+        },
+        {
+          "name": "Tailwind CSS",
+          "aliases": [
+            "tailwind",
+            "tailwindcss"
+          ]
+        },
+        {
+          "name": "Redux",
+          "aliases": []
+        },
+        {
+          "name": "Responsive Design",
+          "aliases": [
+            "responsive web design"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Backend",
+      "skills": [
+        {
+          "name": "Node.js",
+          "aliases": [
+            "nodejs",
+            "node"
+          ]
+        },
+        {
+          "name": "Express.js",
+          "aliases": [
+            "express",
+            "expressjs"
+          ]
+        },
+        {
+          "name": "Django",
+          "aliases": []
+        },
+        {
+          "name": "Flask",
+          "aliases": []
+        },
+        {
+          "name": "FastAPI",
+          "aliases": []
+        },
+        {
+          "name": "Spring Boot",
+          "aliases": [
+            "springboot",
+            "spring"
+          ]
+        },
+        {
+          "name": "REST APIs",
+          "aliases": [
+            "rest",
+            "restful api",
+            "rest api"
+          ]
+        },
+        {
+          "name": "GraphQL",
+          "aliases": []
+        },
+        {
+          "name": "Authentication",
+          "aliases": [
+            "auth",
+            "authn"
+          ]
+        },
+        {
+          "name": "WebSockets",
+          "aliases": [
+            "websocket",
+            "socket.io"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Databases",
+      "skills": [
+        {
+          "name": "PostgreSQL",
+          "aliases": [
+            "postgres",
+            "psql"
+          ]
+        },
+        {
+          "name": "MySQL",
+          "aliases": []
+        },
+        {
+          "name": "MongoDB",
+          "aliases": [
+            "mongo"
+          ]
+        },
+        {
+          "name": "Redis",
+          "aliases": []
+        },
+        {
+          "name": "SQL",
+          "aliases": []
+        },
+        {
+          "name": "Prisma",
+          "aliases": [
+            "prisma orm"
+          ]
+        },
+        {
+          "name": "Firebase",
+          "aliases": []
+        },
+        {
+          "name": "Database Design",
+          "aliases": [
+            "db design",
+            "schema design"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DevOps and Cloud",
+      "skills": [
+        {
+          "name": "Git",
+          "aliases": [
+            "github",
+            "version control"
+          ]
+        },
+        {
+          "name": "Docker",
+          "aliases": []
+        },
+        {
+          "name": "CI/CD",
+          "aliases": [
+            "cicd",
+            "github actions"
+          ]
+        },
+        {
+          "name": "AWS",
+          "aliases": [
+            "amazon web services"
+          ]
+        },
+        {
+          "name": "Linux",
+          "aliases": []
+        },
+        {
+          "name": "Nginx",
+          "aliases": []
+        },
+        {
+          "name": "Kubernetes",
+          "aliases": [
+            "k8s"
+          ]
+        },
+        {
+          "name": "Cloud Deployment",
+          "aliases": [
+            "deployment",
+            "hosting"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mobile",
+      "skills": [
+        {
+          "name": "React Native",
+          "aliases": [
+            "reactnative"
+          ]
+        },
+        {
+          "name": "Flutter",
+          "aliases": []
+        },
+        {
+          "name": "Android Development",
+          "aliases": [
+            "android"
+          ]
+        },
+        {
+          "name": "iOS Development",
+          "aliases": [
+            "ios"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Design",
+      "skills": [
+        {
+          "name": "Figma",
+          "aliases": []
+        },
+        {
+          "name": "UI/UX Design",
+          "aliases": [
+            "ui",
+            "ux",
+            "uiux",
+            "ui ux"
+          ]
+        },
+        {
+          "name": "Graphic Design",
+          "aliases": []
+        },
+        {
+          "name": "Prototyping",
+          "aliases": [
+            "wireframing"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AI and Data",
+      "skills": [
+        {
+          "name": "Machine Learning",
+          "aliases": [
+            "ml"
+          ]
+        },
+        {
+          "name": "Deep Learning",
+          "aliases": [
+            "dl"
+          ]
+        },
+        {
+          "name": "Data Analysis",
+          "aliases": [
+            "data analytics"
+          ]
+        },
+        {
+          "name": "Pandas",
+          "aliases": []
+        },
+        {
+          "name": "NumPy",
+          "aliases": []
+        },
+        {
+          "name": "TensorFlow",
+          "aliases": []
+        },
+        {
+          "name": "PyTorch",
+          "aliases": []
+        },
+        {
+          "name": "NLP",
+          "aliases": [
+            "natural language processing"
+          ]
+        },
+        {
+          "name": "Data Visualization",
+          "aliases": [
+            "dataviz"
+          ]
+        },
+        {
+          "name": "LLM Apps",
+          "aliases": [
+            "llm",
+            "prompt engineering",
+            "generative ai"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Practices",
+      "skills": [
+        {
+          "name": "Testing",
+          "aliases": [
+            "unit testing",
+            "qa"
+          ]
+        },
+        {
+          "name": "Agile",
+          "aliases": [
+            "scrum"
+          ]
+        },
+        {
+          "name": "Technical Writing",
+          "aliases": [
+            "documentation"
+          ]
+        },
+        {
+          "name": "Project Management",
+          "aliases": [
+            "pm"
+          ]
+        },
+        {
+          "name": "Data Structures and Algorithms",
+          "aliases": [
+            "dsa",
+            "data structures",
+            "algorithms"
+          ]
+        },
+        {
+          "name": "System Design",
+          "aliases": []
+        },
+        {
+          "name": "Cybersecurity",
+          "aliases": [
+            "security",
+            "infosec"
+          ]
+        },
+        {
+          "name": "Open Source",
+          "aliases": [
+            "oss"
+          ]
+        }
+      ]
+    }
+  ],
+  "projectCategories": [
+    "Web Development",
+    "Mobile App",
+    "AI and Machine Learning",
+    "Data Science",
+    "Game Development",
+    "DevOps and Cloud",
+    "Open Source Tool",
+    "Hackathon Project",
+    "Design and UX",
+    "Other"
+  ],
+  "interests": [
+    "SaaS",
+    "AI Tools",
+    "Web Development",
+    "Mobile Apps",
+    "Open Source",
+    "Hackathons",
+    "EdTech",
+    "FinTech",
+    "HealthTech",
+    "Game Development",
+    "Cybersecurity",
+    "Data Science",
+    "Startups",
+    "Social Impact"
+  ],
+  "colleges": [
+    "Other / Not listed"
+  ]
+}
