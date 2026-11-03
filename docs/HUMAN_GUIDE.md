@@ -21,6 +21,9 @@
 - Commit at least twice per day. If a day goes badly: `git reset --hard` to the last good commit and retry with a narrower prompt.
 - Never paste real secrets into the chat. `.env` files stay local.
 
+## Two people, one fork (read docs/11_TEAM_SCHEDULE.md)
+The schedule file has the day-by-day split and the exact Git commands. Short version: backend person owns the repository, frontend person works from a fork, each pull request is reviewed and merged by the OTHER person.
+
 ## Division of work with your teammate (suggested)
 Person A: owns backend days (database, services, tests). Person B: owns frontend days. Swap reviewers daily. Both run prompts 6 and 7 on the other person's work.
 Agree the API contracts (docs/05) before coding in parallel; the docs are the contract.

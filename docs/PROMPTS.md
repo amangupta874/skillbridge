@@ -2,19 +2,20 @@
 
 Always start each chat/task with the "Start of day" prompt. One agent, one day at a time. Review the plan the agent proposes BEFORE it writes code.
 
-## 1. First message of the project (Day 1 only)
+## 1. First message of the project (Day 1, each person once; say your role)
 ```
-You are the lead engineer for SkillBridge. Read AGENTS.md completely, then every file in docs/ in numeric order, then docs/PROGRESS.md.
+My role is ROLE (BACKEND or FRONTEND). You are my engineer for SkillBridge. Read AGENTS.md completely, then every file in docs/ in numeric order, then docs/PROGRESS.md.
 Do not write code yet. Reply with: (1) a 10-line summary of the product and stack in your own words, (2) the 8 rules from AGENTS.md you consider most
 important, (3) anything in the docs that is ambiguous, contradictory or missing, (4) your plan for Day 1 from docs/10_DAILY_PLAN.md as a checklist.
 Wait for my approval before starting.
 ```
 
-## 2. Start of day (replace N)
+## 2. Start of day (replace N and ROLE; use BACKEND or FRONTEND)
 ```
-Today is Day N of the plan. Read AGENTS.md, docs/PROGRESS.md and the Day N section of docs/10_DAILY_PLAN.md, then the docs listed under "Read first".
+My role is ROLE. Today is calendar day N. Read AGENTS.md, docs/PROGRESS.md, my role's progress file, today's row in docs/11_TEAM_SCHEDULE.md,
+then ONLY my part of the plan day it names in docs/10_DAILY_PLAN.md and the docs listed under "Read first".
 Propose a short implementation plan (files you will create or change, tests you will write, how you will verify manually). Do not code until I say "go".
-Only today's scope. If something is unclear or the docs conflict, ask me instead of guessing.
+Only my role's folder and today's scope. If something is unclear or the docs conflict, ask me instead of guessing.
 ```
 
 ## 3. Go

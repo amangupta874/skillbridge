@@ -4,7 +4,7 @@ This folder is the complete specification for SkillBridge. The human owner has a
 Your job is to BUILD the product exactly as specified, day by day, and have it deployed and demo-ready by 25 Nov 2026.
 
 ## Reading order
-1. `AGENTS.md` (rules, repeated every session)  2. `PROGRESS.md` (where we are)  3. `10_DAILY_PLAN.md` (today's scope)
+1. `AGENTS.md` (rules, repeated every session)  2. `PROGRESS.md` (where we are)  3. `11_TEAM_SCHEDULE.md` (who does what today) and `10_DAILY_PLAN.md` (details of each task)
 4. The docs named under "Read first" for today. Reference docs: 01 requirements, 02 stack, 03 architecture, 04 database,
 05 API, 06 business logic, 07 frontend, 08 security/testing/logging, 09 deployment.
 

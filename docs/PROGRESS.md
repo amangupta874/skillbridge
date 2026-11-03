@@ -1,6 +1,6 @@
 # PROGRESS (the agent updates this file at the end of every task and every day)
 
-Last verified: 2026-11-02, npm run verify green        Live URL: (fill after D6)        API URL: (fill after D6)        Repo: https://github.com/amangupta874/skillbridge
+Last verified: 2026-11-03, npm run verify passed        Live URL: (fill after D6)        API URL: (fill after D6)        Repo: https://github.com/amangupta874/skillbridge.git
 
 ## Status by day (tick when DONE per docs/10 "Done when")
 - [x] D1 setup, database, repository      - [ ] D2 auth backend              - [ ] D3 helpers, lookups, skills, client foundation
@@ -16,26 +16,16 @@ Last verified: 2026-11-02, npm run verify green        Live URL: (fill after D6)
 - [ ] D31 final checks and submit
 
 ## Current day notes
-Day 1: Setup, database, and repository.
-- Dependencies installed via `npm install` for root, server, and client workspaces.
-- Schema fix: Formatted Prisma enum definitions across multiple lines in `server/prisma/schema.prisma` for Prisma 6 compatibility.
-- Generated Prisma client (`npx prisma generate`).
-- Created initial migration `20261102162407_init` with `extra-constraints.sql` appended (team size check, self-exchange check, partial unique index for active exchanges, notification target check, and `skill_demand_supply` SQL view).
-- Applied migrations to `skillbridge_dev` and `skillbridge_test`.
-- Seeded catalogue: 74 skills, 9 skill categories, 10 project categories, 14 interests, 1 college.
-- Verified in PostgreSQL: `chk_team_size`, `chk_not_self`, `chk_one_target`, `uq_active_exchange`, and `skill_demand_supply` view.
-- Manual check: `GET /api/health` against live database returned 200 `{ data: { status: 'ok' } }` with X-Request-Id and security headers.
-- Git initialized on branch `main` with `.gitignore` properly excluding secrets and node_modules.
-- What is next: D2 auth backend (`modules/auth`).
+Day 1: Configured server environment (.env, .env.test), resolved enum formatting in schema.prisma, generated Prisma Client, created and applied initial migration 20261103173612_init with extra-constraints.sql to dev and test databases, seeded catalogue (74 skills, 9 skill categories, 10 project categories, 14 interests, 1 college), verified table constraints and demand/supply view, verified GET /api/health live check, verified npm run verify green.
 
 ## Decisions (answers from the human)
-- 2026-11-02: PostgreSQL databases `skillbridge_dev` and `skillbridge_test` created; configured with connection string `postgresql://amangupta@localhost:5432/*`.
+(date: question -> decision)
 
 ## Deviations from the docs (must be justified; ask the human first)
-- (none)
+(none)
 
 ## Known issues / risks
-- (none)
+(none)
 
 ## Verification log
-- 2026-11-02: `npm run verify` -> PASS (ESLint 0 errors, oxlint 0 errors, 14 server tests passed, 3 client tests passed, client vite build succeeded).
+2026-11-03: npm run verify -> PASS (oxlint, eslint, vitest server 14/14, vitest client 3/3, vite build)

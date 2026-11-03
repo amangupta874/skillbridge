@@ -10,7 +10,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "node prisma/seed.js",
-    "db:reset:test": "dotenv -e .env.test -- prisma migrate reset --force --skip-seed"
+    "db:reset:test": "dotenv run -f .env.test -- prisma migrate reset --force --skip-seed"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
