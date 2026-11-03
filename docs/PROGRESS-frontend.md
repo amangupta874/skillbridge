@@ -2,7 +2,7 @@
 
 Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run verify` is green. Dates and tasks: docs/11_TEAM_SCHEDULE.md.
 
-- [ ] Day 1 fork, clone, install, run verify
+- [x] Day 1 fork, clone, install, run verify
 - [ ] 2 client foundation: api client, AuthProvider, ProtectedRoute, layouts, shared components (plan D3 client)
 - [ ] 3 login and register pages + client tests (plan D4 client)   - [ ] 4 dashboard shell, navbar, public profile page
 - [ ] 5 SkillPicker + edit profile page (plan D5 client)          - [ ] 6 deploy frontend + /api rewrite (plan D6)
@@ -16,3 +16,4 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [ ] 21 FEATURE FREEZE          - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+- Day 1: Created branch feature/frontend-day1. Installed workspace dependencies (`npm install`). Executed baseline lint (`oxlint` + `eslint`), unit/smoke tests (`vitest run` on client and server), and production build (`vite build`). All checks passed green (`npm run verify`).
