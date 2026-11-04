@@ -25,3 +25,4 @@ export async function register({ fullName, email, password }) {
 export async function logout() {
   await api.post('/auth/logout');
 }
+

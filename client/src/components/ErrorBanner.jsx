@@ -26,3 +26,4 @@ export default function ErrorBanner({ error, onRetry, className = '' }) {
     </div>
   );
 }
+

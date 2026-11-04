@@ -42,3 +42,4 @@ describe('api client helpers', () => {
     expect(fieldErrorsFromApiError({})).toEqual({});
   });
 });
+
