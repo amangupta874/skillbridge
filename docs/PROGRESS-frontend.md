@@ -4,7 +4,7 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 
 - [x] Day 1 fork, clone, install, run verify
 - [x] 2 client foundation: api client, AuthProvider, ProtectedRoute, layouts, shared components (plan D3 client)
-- [ ] 3 login and register pages + client tests (plan D4 client)   - [ ] 4 dashboard shell, navbar, public profile page
+- [x] 3 login and register pages + client tests (plan D4 client)   - [ ] 4 dashboard shell, navbar, public profile page
 - [ ] 5 SkillPicker + edit profile page (plan D5 client)          - [ ] 6 deploy frontend + /api rewrite (plan D6)
 - [ ] 7 review (plan D7)                                           - [ ] 8 ProjectCard, filters, pagination with sample data
 - [ ] 9 discovery page + project detail (plan D9)                  - [ ] 10 project form + my projects (plan D10)
@@ -18,3 +18,4 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 ## Notes per task (files, tests added, manual checks, issues)
 - Day 1: Created branch feature/frontend-day1. Installed workspace dependencies (`npm install`). Executed baseline lint (`oxlint` + `eslint`), unit/smoke tests (`vitest run` on client and server), and production build (`vite build`). All checks passed green (`npm run verify`).
 - Day 2 (plan D3 client): Built client API wrapper (client.js, ApiError, fieldErrorsFromApiError, auth.js), AuthProvider with TanStack useQuery and cache clearing, ProtectedRoute with loading and redirect, responsive AppLayout with mobile navigation menu and AuthLayout, shared UI components (Button, Input, ErrorBanner, Spinner, EmptyState, ToastProvider), wired React Router with auth and protected placeholder routes. Added unit tests for api client, ProtectedRoute, components, and App root navigation. npm run verify is green.
+- Day 3 (plan D4 client): Built full Login and Register pages using react-hook-form + zodResolver with API-aligned validation schemas. Implemented backend error handling via fieldErrorsFromApiError (field-level server errors) and ErrorBanner (general errors), pending states disabling submits with spinner, and redirecting authenticated users. Created personalized DashboardPage greeting showing the user's name. Added 8 unit tests in AuthPages.test.jsx covering form validation, 401 error display, duplicate email conflict handling, valid login redirect, and dashboard greeting. npm run verify is green.

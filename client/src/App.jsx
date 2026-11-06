@@ -6,13 +6,10 @@ import { ToastProvider } from './components/Toast.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import AppLayout from './layouts/AppLayout.jsx';
 import AuthLayout from './layouts/AuthLayout.jsx';
-import {
-  LoginPagePlaceholder,
-  RegisterPagePlaceholder,
-  DashboardPlaceholder,
-  PlaceholderPage,
-  NotFoundPage,
-} from './pages/PlaceholderPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
+import { PlaceholderPage, NotFoundPage } from './pages/PlaceholderPage.jsx';
 
 export function createQueryClient() {
   return new QueryClient({
@@ -36,8 +33,8 @@ export default function App({ client }) {
             <Routes>
               {/* Public Auth Routes */}
               <Route element={<AuthLayout />}>
-                <Route path="/login" element={<LoginPagePlaceholder />} />
-                <Route path="/register" element={<RegisterPagePlaceholder />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
               </Route>
 
               {/* Protected App Routes */}
@@ -48,7 +45,7 @@ export default function App({ client }) {
                   </ProtectedRoute>
                 }
               >
-                <Route path="/" element={<DashboardPlaceholder />} />
+                <Route path="/" element={<DashboardPage />} />
                 <Route
                   path="/projects"
                   element={<PlaceholderPage title="Projects Discovery" description="Browse student projects." />}
