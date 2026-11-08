@@ -2,8 +2,8 @@
 
 Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run verify` is green. Dates and tasks: docs/11_TEAM_SCHEDULE.md.
 
-- [ ] Day 1 fork, clone, install, run verify
-- [ ] 2 client foundation: api client, AuthProvider, ProtectedRoute, layouts, shared components (plan D3 client)
+- [x] Day 1 fork, clone, install, run verify
+- [x] 2 client foundation: api client, AuthProvider, ProtectedRoute, layouts, shared components (plan D3 client)
 - [ ] 3 login and register pages + client tests (plan D4 client)   - [ ] 4 dashboard shell, navbar, public profile page
 - [ ] 5 SkillPicker + edit profile page (plan D5 client)          - [ ] 6 deploy frontend + /api rewrite (plan D6)
 - [ ] 7 review (plan D7)                                           - [ ] 8 ProjectCard, filters, pagination with sample data
@@ -16,3 +16,5 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [ ] 21 FEATURE FREEZE          - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+- Day 1: Created branch feature/frontend-day1. Installed workspace dependencies (`npm install`). Executed baseline lint (`oxlint` + `eslint`), unit/smoke tests (`vitest run` on client and server), and production build (`vite build`). All checks passed green (`npm run verify`).
+- Day 2 (plan D3 client): Built client API wrapper (client.js, ApiError, fieldErrorsFromApiError, auth.js), AuthProvider with TanStack useQuery and cache clearing, ProtectedRoute with loading and redirect, responsive AppLayout with mobile navigation menu and AuthLayout, shared UI components (Button, Input, ErrorBanner, Spinner, EmptyState, ToastProvider), wired React Router with auth and protected placeholder routes. Added unit tests for api client, ProtectedRoute, components, and App root navigation. npm run verify is green.
