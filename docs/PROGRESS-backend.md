@@ -3,7 +3,7 @@
 Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run verify` is green. Dates and tasks: docs/11_TEAM_SCHEDULE.md.
 
 - [x] Day 1 setup, repo, database, migration, seed, CI (plan D1)
-- [x] 2 auth backend (plan D2)                          - [ ] 3 test helpers, lookups, skills (plan D3 backend)
+- [x] 2 auth backend (plan D2)                          - [x] 3 test helpers, lookups, skills (plan D3 backend)
 - [ ] 4 users backend (plan D4 backend)                 - [ ] 5 profile backend (plan D5 backend)
 - [ ] 6 deploy database + API (plan D6)                 - [ ] 7 review (plan D7)
 - [ ] 8 projects backend (plan D8)                      - [ ] 9 applications backend (plan D11)
@@ -46,3 +46,17 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
   - Logout: 204+clears cookie+deletes session row, subsequent /me→401, 401 when not logged in.
 - **Verification**:
   - `npm run verify` passed: lint clean, 32 server tests, 3 client tests, build OK.
+
+### Day 3 (Test helpers, lookups, skills)
+- **Files created**:
+  - `server/tests/helpers.js`: shared database reset, user registration, and category/skill factories.
+  - `server/src/modules/lookups/`: lookup schema, service, controller, routes, and tests.
+  - `server/src/modules/skills/`: skill search schema, service, controller, routes, and tests.
+- **Files changed**:
+  - `server/src/routes.js`: mounted `/lookups` and `/skills` routes.
+- **Tests (7 new)**:
+  - Lookups: response shape, unauthenticated request, empty lookup tables.
+  - Skills: name/alias search and category response, invalid limit, unauthenticated request, empty search results.
+  - `/lookups` accepts no query fields by contract, so it has no input validation error case.
+- **Verification**:
+  - `npm run verify` passed: lint clean, 39 server tests, 17 client tests, build OK.
