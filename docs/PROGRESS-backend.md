@@ -4,7 +4,7 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 
 - [x] Day 1 setup, repo, database, migration, seed, CI (plan D1)
 - [x] 2 auth backend (plan D2)                          - [x] 3 test helpers, lookups, skills (plan D3 backend)
-- [ ] 4 users backend (plan D4 backend)                 - [ ] 5 profile backend (plan D5 backend)
+- [x] 4 users backend (plan D4 backend)                 - [x] 5 profile backend (plan D5 backend)
 - [ ] 6 deploy database + API (plan D6)                 - [ ] 7 review (plan D7)
 - [ ] 8 projects backend (plan D8)                      - [ ] 9 applications backend (plan D11)
 - [ ] 10 decide + row lock + concurrency test (plan D12)- [ ] 11 exchanges backend (plan D15)
@@ -60,3 +60,20 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
   - `/lookups` accepts no query fields by contract, so it has no input validation error case.
 - **Verification**:
   - `npm run verify` passed: lint clean, 39 server tests, 17 client tests, build OK.
+
+### Days 4–5 (Users and profile backend)
+- **Files created**:
+  - `server/src/modules/users/users.routes.js`, `users.schema.js`, `users.controller.js`, `users.service.js`, and `users.test.js`.
+- **Files changed**:
+  - `server/src/routes.js`: mounted the users routes.
+- **Endpoints**:
+  - `GET /users/:id`: public profile without email.
+  - `GET /users`: paginated user cards, name and skill filters, caller excluded.
+  - `PATCH /users/me`: profile fields, college check, transactional link and interest replacement.
+  - `PUT /users/me/skills` and `PUT /users/me/learning-goals`: replace sets after id and known/goal exclusivity checks.
+- **Tests (22 new)**:
+  - Happy paths, validation failures and unauthenticated requests for all five endpoints; unknown user, empty search, unknown ids, known/goal overlap, and public email privacy.
+- **Deferred rule**:
+  - The 409 check for removing a skill used in a pending or accepted exchange is deferred until the exchanges module exists.
+- **Verification**:
+  - `npm run verify` passed: lint clean, 62 server tests, 17 client tests, build OK.
