@@ -140,12 +140,16 @@ describe('POST /api/auth/login', () => {
   });
 
   test('unknown email returns 401 with the same message', async () => {
+    const startedAt = Date.now();
     const res = await request(app).post('/api/auth/login').send({
       email: 'nobody@test.com',
       password: 'Password1',
     });
+    const elapsed = Date.now() - startedAt;
+
     expect(res.status).toBe(401);
     expect(res.body.error.message).toBe('Invalid email or password');
+    expect(elapsed).toBeGreaterThanOrEqual(100);
   });
 
   test('email is case-insensitive on login', async () => {

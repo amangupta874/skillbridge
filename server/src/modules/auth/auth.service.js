@@ -41,7 +41,7 @@ export async function register({ fullName, email, password }) {
 }
 
 // Dummy hash so bcrypt.compare takes the same time even when the user does not exist.
-const DUMMY_HASH = '$2a$12$000000000000000000000u2a0bMVFBCCzXqAaKDqf4LA0S.2lAJq';
+const DUMMY_HASH = bcrypt.hashSync('not-a-real-password', 12);
 
 export async function login({ email, password }) {
   const normalEmail = email.trim().toLowerCase();
