@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { env } from '../src/config/env.js';
 import { prisma } from '../src/config/prisma.js';
 import { app } from '../src/app.js';
 
@@ -7,7 +8,15 @@ const ALL_TABLES = ['notifications', 'skill_exchanges', 'project_members', 'proj
   'interests', 'project_categories', 'users', 'colleges'];
 
 export async function resetDatabase() {
+  assertTestDatabase(env.DATABASE_URL);
+
   await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${ALL_TABLES.map((table) => `"${table}"`).join(', ')} RESTART IDENTITY CASCADE`);
+}
+
+export function assertTestDatabase(databaseUrl) {
+  if (!databaseUrl.includes('test')) {
+    throw new Error('Refusing to reset a database whose DATABASE_URL does not contain "test"');
+  }
 }
 
 let userCounter = 0;
