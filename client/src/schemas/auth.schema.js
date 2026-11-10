@@ -30,3 +30,4 @@ export const registerSchema = z.object({
     .regex(/[a-zA-Z]/, 'Password must contain at least one letter')
     .regex(/[0-9]/, 'Password must contain at least one number'),
 });
+
