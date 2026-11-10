@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import PublicProfilePage from './pages/PublicProfilePage.jsx';
+import EditProfilePage from './pages/EditProfilePage.jsx';
 import { PlaceholderPage, NotFoundPage } from './pages/PlaceholderPage.jsx';
 
 export function createQueryClient() {
@@ -68,10 +69,7 @@ export default function App({ client }) {
                   path="/notifications"
                   element={<PlaceholderPage title="Notifications" description="View your activity and alerts." />}
                 />
-                <Route
-                  path="/profile/edit"
-                  element={<PlaceholderPage title="Edit Profile" description="Customize your profile details and skills." />}
-                />
+                <Route path="/profile/edit" element={<EditProfilePage />} />
               </Route>
 
               {/* 404 Catch-All */}

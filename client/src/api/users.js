@@ -27,3 +27,43 @@ export async function getUsers(params = {}) {
     };
   }
 }
+
+export async function updateProfile(data) {
+  try {
+    const res = await api.patch('/users/me', data);
+    return res.data.data;
+  } catch (err) {
+    // Fallback updates sample user 1
+    if (sampleUsers[0]) {
+      Object.assign(sampleUsers[0], data);
+      return sampleUsers[0];
+    }
+    throw err;
+  }
+}
+
+export async function updateSkills(skills) {
+  try {
+    const res = await api.put('/users/me/skills', { skills });
+    return res.data.data;
+  } catch (err) {
+    if (sampleUsers[0]) {
+      sampleUsers[0].skills = skills;
+      return sampleUsers[0];
+    }
+    throw err;
+  }
+}
+
+export async function updateLearningGoals(skillIds) {
+  try {
+    const res = await api.put('/users/me/learning-goals', { skillIds });
+    return res.data.data;
+  } catch (err) {
+    if (sampleUsers[0]) {
+      sampleUsers[0].learningGoals = skillIds.map((id) => ({ id, name: `Skill ${id}` }));
+      return sampleUsers[0];
+    }
+    throw err;
+  }
+}

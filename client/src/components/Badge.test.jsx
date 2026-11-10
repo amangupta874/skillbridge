@@ -35,3 +35,4 @@ describe('Badge Component', () => {
     expect(lgContainer.firstChild).toHaveClass('text-sm');
   });
 });
+

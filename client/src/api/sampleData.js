@@ -147,3 +147,58 @@ export const sampleNotifications = [
     link: '/exchanges',
   },
 ];
+
+export const sampleLookups = {
+  colleges: [
+    { id: 1, name: 'SVYASA University' },
+    { id: 2, name: 'MIT World Peace University' },
+    { id: 3, name: 'Stanford University' },
+    { id: 4, name: 'Other / Not listed' },
+  ],
+  interests: [
+    { id: 1, name: 'Open Source' },
+    { id: 2, name: 'Web Development' },
+    { id: 3, name: 'AI & Machine Learning' },
+    { id: 4, name: 'Robotics' },
+    { id: 5, name: 'Cloud Computing' },
+    { id: 6, name: 'Cybersecurity' },
+    { id: 7, name: 'Data Science' },
+    { id: 8, name: 'Mobile Apps' },
+    { id: 9, name: 'SaaS' },
+    { id: 10, name: 'Startups' },
+  ],
+  skillCategories: [
+    { id: 1, name: 'Frontend' },
+    { id: 2, name: 'Backend' },
+    { id: 3, name: 'Database' },
+    { id: 4, name: 'DevOps' },
+    { id: 5, name: 'Systems' },
+    { id: 6, name: 'Design' },
+  ],
+  projectCategories: [
+    { id: 1, name: 'Web Development' },
+    { id: 2, name: 'Hardware & IoT' },
+    { id: 3, name: 'AI & Machine Learning' },
+    { id: 4, name: 'Mobile App' },
+  ],
+};
+
+export const sampleSkills = [
+  { id: 1, name: 'React', category: { id: 1, name: 'Frontend' } },
+  { id: 2, name: 'Node.js', category: { id: 2, name: 'Backend' } },
+  { id: 3, name: 'Tailwind CSS', category: { id: 1, name: 'Frontend' } },
+  { id: 4, name: 'PostgreSQL', category: { id: 3, name: 'Database' } },
+  { id: 5, name: 'Docker', category: { id: 4, name: 'DevOps' } },
+  { id: 6, name: 'GraphQL', category: { id: 2, name: 'Backend' } },
+  { id: 7, name: 'Python', category: { id: 2, name: 'Backend' } },
+  { id: 8, name: 'C++', category: { id: 5, name: 'Systems' } },
+  { id: 9, name: 'TypeScript', category: { id: 1, name: 'Frontend' } },
+  { id: 10, name: 'Go', category: { id: 2, name: 'Backend' } },
+  { id: 11, name: 'Rust', category: { id: 5, name: 'Systems' } },
+  { id: 12, name: 'Figma', category: { id: 6, name: 'Design' } },
+  { id: 13, name: 'Next.js', category: { id: 1, name: 'Frontend' } },
+  { id: 14, name: 'Vue.js', category: { id: 1, name: 'Frontend' } },
+  { id: 15, name: 'Kubernetes', category: { id: 4, name: 'DevOps' } },
+];
+
+
