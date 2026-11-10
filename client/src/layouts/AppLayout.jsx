@@ -22,6 +22,9 @@ export default function AppLayout() {
     { to: '/notifications', label: 'Notifications' },
   ];
 
+  const profileUrl = user?.id ? `/users/${user.id}` : '/profile/edit';
+  const userInitial = (user?.fullName || user?.email || 'U')[0].toUpperCase();
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       {/* Top Navbar */}
@@ -60,10 +63,16 @@ export default function AppLayout() {
               {user && (
                 <div className="flex items-center gap-3">
                   <Link
-                    to="/profile/edit"
-                    className="text-sm font-medium text-slate-700 hover:text-indigo-600"
+                    to={profileUrl}
+                    className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-colors"
+                    title="View your public profile"
                   >
-                    {user.fullName || user.email}
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700 border border-indigo-200">
+                      {userInitial}
+                    </span>
+                    <span className="max-w-[140px] truncate">
+                      {user.fullName || user.email}
+                    </span>
                   </Link>
                   <Button variant="secondary" size="sm" onClick={handleLogout}>
                     Log out
@@ -120,6 +129,13 @@ export default function AppLayout() {
                     Signed in as <span className="font-semibold">{user.fullName || user.email}</span>
                   </div>
                   <Link
+                    to={profileUrl}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 text-sm text-slate-700 hover:text-indigo-600 font-medium"
+                  >
+                    Public profile
+                  </Link>
+                  <Link
                     to="/profile/edit"
                     onClick={() => setMobileMenuOpen(false)}
                     className="block px-3 py-2 text-sm text-indigo-600 font-medium"
@@ -158,4 +174,3 @@ export default function AppLayout() {
     </div>
   );
 }
-

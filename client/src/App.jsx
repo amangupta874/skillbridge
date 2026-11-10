@@ -9,6 +9,7 @@ import AuthLayout from './layouts/AuthLayout.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
+import PublicProfilePage from './pages/PublicProfilePage.jsx';
 import { PlaceholderPage, NotFoundPage } from './pages/PlaceholderPage.jsx';
 
 export function createQueryClient() {
@@ -46,6 +47,7 @@ export default function App({ client }) {
                 }
               >
                 <Route path="/" element={<DashboardPage />} />
+                <Route path="/users/:id" element={<PublicProfilePage />} />
                 <Route
                   path="/projects"
                   element={<PlaceholderPage title="Projects Discovery" description="Browse student projects." />}
