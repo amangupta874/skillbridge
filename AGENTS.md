@@ -57,12 +57,15 @@ It is a 2-student college capstone (AP + DE courses). It must be **deployed live
 - Validate body, query and params with zod on every route; unknown fields are stripped. Cap page size at 50.
 - Never commit `.env` files. Keep `.env.example` files current. No secrets in code, tests or docs.
 
-## Code style
-- Simple, readable code with clear names (`applicationStatus`, not `st`). Small functions. Comments explain WHY, not what.
-- No clever one-liners, no premature abstraction, no dead code, no commented-out code, no `console.log` (use the logger; the client may use none).
-- No placeholder or stub shown as finished. No invented endpoints, tables or fields: if the docs do not define it, ask.
-- New dependency = add it to docs/02_TECH_STACK.md and to the README acknowledgements in the same commit, and tell the human.
-- Frontend: every page has loading, empty and error states; forms show field errors from `error.details`; buttons are disabled while submitting.
+## Code style: write like a careful student, not like a template
+- Plain, direct code. Short functions with normal names (user, project, applications). Use a simple if or for where a clever pattern is not needed.
+- Comments: few and short, in plain English, only where the reason is not obvious (for example why the row lock is there). No comment on every line or function. No banner comments, no JSDoc blocks on simple functions, no emojis.
+- Do not add what was not asked: no extra options, no helper used only once, no checks for cases that cannot happen, no try/catch that only rethrows.
+- Avoid words like robust, comprehensive, seamless and leverage in code, comments, commit messages and UI text. UI text uses everyday words ("Your application was sent").
+- Avoid vague names such as data, result, item, temp when a real name exists.
+- Tests: names describe the behaviour in plain words, a few asserts each.
+- Commit messages: short and natural, for example "add login and register routes".
+- Keep the existing style of the file you are editing. Do not reformat or rename unrelated code.
 
 ## Commands (run from repo root unless noted)
 `npm install` | `npm run dev` (server + client) | `npm run lint` | `npm test` | `npm run build` | `npm run verify` (lint + test + build, the gate)

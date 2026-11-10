@@ -2,7 +2,10 @@ import dotenv from 'dotenv';
 import { z } from 'zod';
 
 // Tests load .env.test, everything else loads .env (run commands from the server/ folder).
-dotenv.config({ path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env' });
+dotenv.config({
+  path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+  override: process.env.NODE_ENV === 'test',
+});
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
