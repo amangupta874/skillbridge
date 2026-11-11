@@ -106,3 +106,4 @@ describe('SkillPicker Component', () => {
     expect(handleChange).toHaveBeenCalledWith([{ id: 2, name: 'Node.js' }]);
   });
 });
+
