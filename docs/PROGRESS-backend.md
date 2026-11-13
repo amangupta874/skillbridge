@@ -15,6 +15,20 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Deployment preparation (2026-11-11; D6 checklist requested)
+- **Files added**: `docs/DEPLOYMENT_RUNBOOK.md` (Neon, Render, Vercel steps); `client/vercel.json` (requested frontend proxy and SPA fallback; this file belongs to the frontend person).
+- **Production settings checked**: `app.js` trusts one proxy and configures CORS for exactly `CLIENT_ORIGIN` with credentials; `originCheck` compares state-changing request origins to `CLIENT_ORIGIN`; the session cookie uses `COOKIE_SAMESITE` (runbook sets `lax`) and is `HttpOnly` and `Secure` in production. No production setting changes were needed.
+- **Manual production-mode check**: started the API with `NODE_ENV=production` using `server/.env`, then requested `GET /api/health` at `http://127.0.0.1:4000/api/health`; it returned 500 because PostgreSQL rejected the configured local credentials. Repeated with `.env.test`; it failed with the same DB authentication error. Auth requests could not be exercised because the health/database connection failed first. No database URL was printed or shared. Browser use of the production `Secure` cookie over plain HTTP would also require HTTPS; cookie flags are set by code but not browser usability over HTTP.
+- **Status at this check**: D6 was not complete at the time; the database and API were deployed later on 2026-11-13 (see follow-up below). Live frontend register/login/profile checks remain.
+- **Verification at this check**: `npm run verify` was blocked: lint passed; client tests passed (43/43); server tests had 29 failures because PostgreSQL rejected the local test DB credentials (18 auth tests skipped after setup failure); the build phase was not reached by `verify`. `npm run build` passed separately. The test DB login was repaired on 2026-11-13 (see follow-up below).
+
+### Deployment and local test DB follow-up (2026-11-13)
+- Started the installed Homebrew PostgreSQL 18 service. This differs from the project's pinned PostgreSQL 16 version and should be aligned with PostgreSQL 16 in a later local setup pass.
+- Confirmed `server/.env` connects with `select 1`. Rebuilt `server/.env.test` with `NODE_ENV=test`, `CLIENT_ORIGIN=http://localhost:5173`, and the `.env` URL using database `skillbridge_test`. Confirmed both databases exist and the test URL connects. `prisma migrate deploy` reported no pending migrations.
+- `npm run verify` passed: 62 server tests, 43 client tests, and Vite build.
+- Render API deployed at `https://skillbridge-6dhg.onrender.com`; `/api/health` returned `{"data":{"status":"ok"}}`, the Render health check path is `/api/health`, and the production catalogue seed completed (`Catalogue seeded.`).
+- Updated `client/vercel.json` to use the public Render API host. The file remains frontend-owned; frontend deployment and live register/login/profile checks remain.
+
 ### Day 1 (Setup, database, migration, seed)
 - **Files created / changed**:
   - `server/.env`, `server/.env.test` configured with local PostgreSQL connection.
