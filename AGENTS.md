@@ -23,6 +23,7 @@ It is a 2-student college capstone (AP + DE courses). It must be **deployed live
 - The API contract is `docs/05_API_SPEC.md`. Backend must not change response shapes without approval. Frontend must not invent fields: if a field is missing,
   STOP and tell the human to ask the backend person; record the answer in `docs/PROGRESS.md` "Decisions". Until the real API is merged, frontend uses sample data
   shaped exactly like the DTOs in doc 05 (keep it in `client/src/api/sampleData.js`, delete when wired).
+- Once the backend endpoint for a feature is merged, never fall back to sample data when an API call fails; show the error.
 - Work on a branch named `feature/<role>-<topic>` (example `feature/backend-auth`). Never commit to `main`. Do not push or open pull requests unless the human asks.
 - Run `npm run verify` before every commit. Merge conflicts: keep both sides' intent, rerun verify, tell the human what you merged.
 

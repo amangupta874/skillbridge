@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getSkills } from '../api/skills.js';
+import ErrorBanner from './ErrorBanner.jsx';
 
 const SKILL_LEVELS = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];
 
@@ -18,6 +19,7 @@ export default function SkillPicker({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState('INTERMEDIATE');
   const [isLoading, setIsLoading] = useState(false);
+  const [searchError, setSearchError] = useState(null);
   const containerRef = useRef(null);
 
   // Close suggestions when clicking outside
@@ -40,10 +42,14 @@ export default function SkillPicker({
       try {
         const results = await getSkills({ query: query.trim(), limit: 10 });
         if (active) {
+          setSearchError(null);
           setSuggestions(results || []);
         }
-      } catch {
-        if (active) setSuggestions([]);
+      } catch (error) {
+        if (active) {
+          setSuggestions([]);
+          setSearchError(error);
+        }
       } finally {
         if (active) setIsLoading(false);
       }
@@ -111,6 +117,7 @@ export default function SkillPicker({
 
   return (
     <div className={`space-y-3 ${className}`} ref={containerRef}>
+      {searchError && <ErrorBanner error={searchError} />}
       {label && (
         <div className="flex items-center justify-between">
           <label className="block text-sm font-medium text-slate-700" htmlFor="skill-picker-input">
