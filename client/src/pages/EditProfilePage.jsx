@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { getUserById, updateProfile, updateSkills, updateLearningGoals } from '../api/users.js';
+import { fieldErrorsFromApiError } from '../api/client.js';
 import { getLookups } from '../api/lookups.js';
 import Card, { CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/Card.jsx';
 import Button from '../components/Button.jsx';
@@ -44,7 +45,7 @@ export default function EditProfilePage() {
   });
 
   // 2. Fetch lookups
-  const { data: lookups } = useQuery({
+  const { data: lookups, error: lookupsError, refetch: refetchLookups } = useQuery({
     queryKey: ['lookups'],
     queryFn: getLookups,
   });
@@ -56,6 +57,7 @@ export default function EditProfilePage() {
   const [collegeId, setCollegeId] = useState('');
   const [isSavingBasic, setIsSavingBasic] = useState(false);
   const [errorBasic, setErrorBasic] = useState(null);
+  const [basicFieldErrors, setBasicFieldErrors] = useState({});
 
   // --- Section 2: Links State ---
   const [links, setLinks] = useState([]);
@@ -115,6 +117,7 @@ export default function EditProfilePage() {
     e.preventDefault();
     setIsSavingBasic(true);
     setErrorBasic(null);
+    setBasicFieldErrors({});
 
     try {
       const payload = {
@@ -129,6 +132,7 @@ export default function EditProfilePage() {
       notifySuccess('Basic information saved successfully');
     } catch (err) {
       setErrorBasic(err.message || 'Failed to update basic information.');
+      setBasicFieldErrors(fieldErrorsFromApiError(err));
     } finally {
       setIsSavingBasic(false);
     }
@@ -262,6 +266,7 @@ export default function EditProfilePage() {
         <form onSubmit={handleSaveBasic}>
           <CardContent className="space-y-4">
             {errorBasic && <ErrorBanner error={errorBasic} />}
+            {lookupsError && <ErrorBanner error={lookupsError} onRetry={() => refetchLookups()} />}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
@@ -273,6 +278,7 @@ export default function EditProfilePage() {
                 required
                 maxLength={80}
                 placeholder="Your full name"
+                error={basicFieldErrors.fullName}
               />
 
               <div className="w-full space-y-1">
@@ -281,6 +287,7 @@ export default function EditProfilePage() {
                 </label>
                 <select
                   id="collegeId"
+                  aria-invalid={Boolean(basicFieldErrors.collegeId)}
                   value={collegeId}
                   onChange={(e) => setCollegeId(e.target.value)}
                   className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-2xs focus:border-indigo-500 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
@@ -292,6 +299,7 @@ export default function EditProfilePage() {
                     </option>
                   ))}
                 </select>
+                {basicFieldErrors.collegeId && <p role="alert" className="text-xs font-medium text-red-600">{basicFieldErrors.collegeId}</p>}
               </div>
             </div>
 
@@ -307,6 +315,7 @@ export default function EditProfilePage() {
                 value={weeklyHours}
                 onChange={(e) => setWeeklyHours(e.target.value)}
                 placeholder="e.g. 15"
+                error={basicFieldErrors.weeklyHours}
               />
             </div>
 
@@ -323,9 +332,11 @@ export default function EditProfilePage() {
                 maxLength={500}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
+                aria-invalid={Boolean(basicFieldErrors.bio)}
                 placeholder="Tell peers about your background, interests, and what you love building..."
                 className="block w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 shadow-2xs focus:border-indigo-500 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
               />
+              {basicFieldErrors.bio && <p role="alert" className="text-xs font-medium text-red-600">{basicFieldErrors.bio}</p>}
             </div>
           </CardContent>
           <CardFooter>

@@ -8,6 +8,7 @@ import * as UsersApi from '../api/users.js';
 import * as LookupsApi from '../api/lookups.js';
 import * as SkillsApi from '../api/skills.js';
 import * as AuthContextModule from '../context/AuthContext.jsx';
+import { ApiError } from '../api/client.js';
 
 vi.mock('../api/users.js', () => ({
   getUserById: vi.fn(),
@@ -176,5 +177,42 @@ describe('EditProfilePage', () => {
       });
       expect(screen.getByText(/profile links saved successfully/i)).toBeInTheDocument();
     });
+  });
+
+  it('shows a profile save error without a success message', async () => {
+    vi.spyOn(UsersApi, 'updateProfile').mockRejectedValue(
+      new ApiError({ status: 500, code: 'INTERNAL_ERROR', message: 'Profile could not be saved' }),
+    );
+    renderWithProviders();
+
+    await waitFor(() => expect(screen.getByDisplayValue('Alice Chen')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /save basic info/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Profile could not be saved');
+    expect(screen.queryByText(/basic information saved successfully/i)).not.toBeInTheDocument();
+  });
+
+  it('shows a lookup error instead of fallback options', async () => {
+    vi.spyOn(LookupsApi, 'getLookups').mockRejectedValue(
+      new ApiError({ status: 503, code: 'UNAVAILABLE', message: 'Lookup service is unavailable' }),
+    );
+    renderWithProviders();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Lookup service is unavailable');
+    expect(screen.queryByRole('option', { name: 'MIT World Peace University' })).not.toBeInTheDocument();
+  });
+
+  it('shows a skill search error instead of fallback skills', async () => {
+    vi.spyOn(SkillsApi, 'getSkills').mockRejectedValue(
+      new ApiError({ status: 503, code: 'UNAVAILABLE', message: 'Skill search is unavailable' }),
+    );
+    renderWithProviders();
+
+    await waitFor(() => expect(screen.getByDisplayValue('Alice Chen')).toBeInTheDocument());
+    const [skillInput] = screen.getAllByPlaceholderText(/type to search skills/i);
+    fireEvent.change(skillInput, { target: { value: 'rust' } });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Skill search is unavailable');
+    expect(screen.queryByRole('button', { name: /rust/i })).not.toBeInTheDocument();
   });
 });
