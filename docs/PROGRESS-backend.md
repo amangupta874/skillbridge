@@ -5,8 +5,8 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [x] Day 1 setup, repo, database, migration, seed, CI (plan D1)
 - [x] 2 auth backend (plan D2)                          - [x] 3 test helpers, lookups, skills (plan D3 backend)
 - [x] 4 users backend (plan D4 backend)                 - [x] 5 profile backend (plan D5 backend)
-- [ ] 6 deploy database + API (plan D6)                 - [ ] 7 review (plan D7)
-- [ ] 8 projects backend (plan D8)                      - [ ] 9 applications backend (plan D11)
+- [x] 6 deploy database + API (plan D6; done 2026-11-14) - [ ] 7 review (plan D7)
+- [x] 8 projects backend (plan D8)                      - [ ] 9 applications backend (plan D11)
 - [ ] 10 decide + row lock + concurrency test (plan D12)- [ ] 11 exchanges backend (plan D15)
 - [ ] 12 matching backend (plan D17)                    - [ ] 13 notifications backend (plan D19 backend)
 - [ ] 14 analytics endpoint + redeploy API (plan D20 backend)  - [ ] 15 backend hardening (plan D22)
@@ -15,6 +15,15 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Day 8 (Projects backend — 2026-11-14)
+- **Files created**: `server/src/modules/projects/projects.schema.js`, `projects.controller.js`, `projects.service.js`, `projects.routes.js`, `transitions.js`, `projects.test.js`, and `transitions.test.js`.
+- **Files changed**: `server/src/routes.js` mounts the projects router.
+- **Endpoints**: Authenticated project create, filtered/paginated list, detail, and owner-only patch. Skills are validated and replaced transactionally. Seat counts and caller role/application are computed in response DTOs; no team-size or FULL status is stored.
+- **Tests added**: 19 total (18 endpoint cases and one transition-table test checking every allowed and illegal transition). Covers validation, unknown skill ids, visibility, list filters, pagination, empty results, capacity, edit authorization, detail seats, and authentication.
+- **Manual check**: Authenticated HTTP requests were exercised through the Supertest integration suite against the test database.
+- **Deferred**: Nothing for the Day 8 scope.
+- **Verification**: `npm run verify` passed: 81 server tests, 47 client tests, lint, and client build.
+
 ### Deployment preparation (2026-11-11; D6 checklist requested)
 - **Files added**: `docs/DEPLOYMENT_RUNBOOK.md` (Neon, Render, Vercel steps); `client/vercel.json` (requested frontend proxy and SPA fallback; this file belongs to the frontend person).
 - **Production settings checked**: `app.js` trusts one proxy and configures CORS for exactly `CLIENT_ORIGIN` with credentials; `originCheck` compares state-changing request origins to `CLIENT_ORIGIN`; the session cookie uses `COOKIE_SAMESITE` (runbook sets `lax`) and is `HttpOnly` and `Secure` in production. No production setting changes were needed.
