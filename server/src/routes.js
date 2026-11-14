@@ -4,6 +4,7 @@ import { authRoutes } from './modules/auth/auth.routes.js';
 import { lookupsRoutes } from './modules/lookups/lookups.routes.js';
 import { skillsRoutes } from './modules/skills/skills.routes.js';
 import { usersRoutes } from './modules/users/users.routes.js';
+import { projectsRoutes } from './modules/projects/projects.routes.js';
 
 export const apiRouter = express.Router();
 
@@ -16,3 +17,4 @@ apiRouter.use('/auth', authRoutes);
 apiRouter.use('/lookups', lookupsRoutes);
 apiRouter.use('/skills', skillsRoutes);
 apiRouter.use('/users', usersRoutes);
+apiRouter.use('/projects', projectsRoutes);
