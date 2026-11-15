@@ -11,6 +11,8 @@ import RegisterPage from './pages/RegisterPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import PublicProfilePage from './pages/PublicProfilePage.jsx';
 import EditProfilePage from './pages/EditProfilePage.jsx';
+import ProjectsPage from './pages/ProjectsPage.jsx';
+import ProjectDetailPage from './pages/ProjectDetailPage.jsx';
 import { PlaceholderPage, NotFoundPage } from './pages/PlaceholderPage.jsx';
 
 export function createQueryClient() {
@@ -49,10 +51,8 @@ export default function App({ client }) {
               >
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/users/:id" element={<PublicProfilePage />} />
-                <Route
-                  path="/projects"
-                  element={<PlaceholderPage title="Projects Discovery" description="Browse student projects." />}
-                />
+                <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/projects/:id" element={<ProjectDetailPage />} />
                 <Route
                   path="/my-projects"
                   element={<PlaceholderPage title="My Projects" description="View projects you created or joined." />}

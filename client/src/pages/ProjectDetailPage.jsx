@@ -1,0 +1,96 @@
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { getProject } from '../api/projects.js';
+import Badge from '../components/Badge.jsx';
+import Button from '../components/Button.jsx';
+import Card from '../components/Card.jsx';
+import EmptyState from '../components/EmptyState.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
+import SkillBadge from '../components/SkillBadge.jsx';
+import Spinner from '../components/Spinner.jsx';
+
+export default function ProjectDetailPage() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const { data: project, isLoading, error, refetch } = useQuery({
+    queryKey: ['project', id],
+    queryFn: () => getProject(id),
+    enabled: Boolean(id),
+  });
+
+  if (isLoading) {
+    return <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-500">Loading project...</p></div>;
+  }
+  if (error?.status === 404) {
+    return <EmptyState title="Project not found" description="This project may have been removed or is not available to you." actionLabel="Browse projects" onAction={() => navigate('/projects')} />;
+  }
+  if (error) return <ErrorBanner error={error} onRetry={() => refetch()} />;
+  if (!project) {
+    return <EmptyState title="Project not found" description="This project may have been removed or is not available to you." actionLabel="Browse projects" onAction={() => navigate('/projects')} />;
+  }
+
+  const seatsUsedPercent = Math.min(100, Math.round((project.seatsTaken / project.maxTeamSize) * 100));
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      <Link to="/projects" className="text-sm font-medium text-indigo-700 hover:text-indigo-900">← Back to projects</Link>
+      <Card>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-indigo-700">{project.category.name}</p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{project.title}</h1>
+          </div>
+          {project.myRole === 'OWNER' && (
+            <Link to={`/projects/${project.id}/edit`}><Button variant="secondary">Edit</Button></Link>
+          )}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Badge variant={project.status}>{project.status.replaceAll('_', ' ')}</Badge>
+          <Badge variant={project.difficulty}>{project.difficulty}</Badge>
+        </div>
+        <section className="mt-6">
+          <h2 className="text-sm font-semibold text-slate-900">About this project</h2>
+          <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-700">{project.description}</p>
+        </section>
+        <section className="mt-6">
+          <div className="flex items-center justify-between text-sm">
+            <h2 className="font-semibold text-slate-900">Team seats</h2>
+            <span className="text-slate-600">{project.seatsTaken} of {project.maxTeamSize} filled · {project.seatsLeft} left</span>
+          </div>
+          <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-label="Team seats filled" aria-valuemin="0" aria-valuemax={project.maxTeamSize} aria-valuenow={project.seatsTaken}>
+            <div className="h-full rounded-full bg-indigo-600" style={{ width: `${seatsUsedPercent}%` }} />
+          </div>
+        </section>
+        <section className="mt-6">
+          <h2 className="text-sm font-semibold text-slate-900">Required skills</h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {project.skills.map((skill) => <SkillBadge key={skill.id} skill={skill} level={`Minimum: ${skill.minLevel}`} />)}
+          </div>
+        </section>
+      </Card>
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <Card>
+          <h2 className="text-base font-semibold text-slate-900">Project owner</h2>
+          <p className="mt-2 text-sm text-slate-700">{project.owner.fullName}</p>
+        </Card>
+        <Card>
+          <h2 className="text-base font-semibold text-slate-900">Team members</h2>
+          {project.members.length ? (
+            <ul className="mt-2 space-y-2">{project.members.map((member) => <li key={member.id} className="text-sm text-slate-700">{member.fullName}</li>)}</ul>
+          ) : <p className="mt-2 text-sm text-slate-500">No members have joined yet.</p>}
+        </Card>
+      </div>
+      {(project.hoursPerWeek != null || project.deadline || project.githubUrl || project.demoUrl) && (
+        <Card>
+          <h2 className="text-base font-semibold text-slate-900">Project details</h2>
+          <dl className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+            {project.hoursPerWeek != null && <div><dt className="font-medium text-slate-500">Time needed</dt><dd className="mt-1 text-slate-800">{project.hoursPerWeek} hours per week</dd></div>}
+            {project.deadline && <div><dt className="font-medium text-slate-500">Deadline</dt><dd className="mt-1 text-slate-800">{new Date(project.deadline).toLocaleDateString()}</dd></div>}
+            {project.githubUrl && <div><dt className="font-medium text-slate-500">GitHub</dt><dd className="mt-1"><a className="break-all text-indigo-700 underline" href={project.githubUrl} target="_blank" rel="noreferrer">{project.githubUrl}</a></dd></div>}
+            {project.demoUrl && <div><dt className="font-medium text-slate-500">Demo</dt><dd className="mt-1"><a className="break-all text-indigo-700 underline" href={project.demoUrl} target="_blank" rel="noreferrer">{project.demoUrl}</a></dd></div>}
+          </dl>
+        </Card>
+      )}
+    </div>
+  );
+}
