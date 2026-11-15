@@ -6,7 +6,7 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [x] 2 auth backend (plan D2)                          - [x] 3 test helpers, lookups, skills (plan D3 backend)
 - [x] 4 users backend (plan D4 backend)                 - [x] 5 profile backend (plan D5 backend)
 - [x] 6 deploy database + API (plan D6; done 2026-11-14) - [ ] 7 review (plan D7)
-- [x] 8 projects backend (plan D8)                      - [ ] 9 applications backend (plan D11)
+- [x] 8 projects backend (plan D8)                      - [x] 9 applications backend (plan D11)
 - [ ] 10 decide + row lock + concurrency test (plan D12)- [ ] 11 exchanges backend (plan D15)
 - [ ] 12 matching backend (plan D17)                    - [ ] 13 notifications backend (plan D19 backend)
 - [ ] 14 analytics endpoint + redeploy API (plan D20 backend)  - [ ] 15 backend hardening (plan D22)
@@ -15,6 +15,15 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Day 11 (Applications backend — 2026-11-15)
+- **Files created**: `server/src/modules/applications/applications.routes.js`, `applications.schema.js`, `applications.controller.js`, `applications.service.js`, `applications.test.js`, and `transitions.js` / `transitions.test.js`.
+- **Files changed**: `server/src/routes.js` mounts the application routes before the generic users route so `/users/me/applications` matches correctly.
+- **Endpoints**: apply, reopen WITHDRAWN applications, applicant withdraw, owner project listing, and caller's application listing. APPLICATION_RECEIVED is created in the same transaction. Application DTOs include a privacy-safe applicant card and transitions for the caller.
+- **Tests added**: apply/notification, own project, missing and hidden DRAFT, non-OPEN, duplicate, reopen, withdraw, wrong actor/state, owner listing with applicant card and pagination, `/users/me/applications`, 401, and transition table coverage.
+- **Manual check**: application HTTP flows and route ordering were exercised through the Supertest integration suite against the test database.
+- **Verification**: `npm run verify` passed: 98 server tests, 51 client tests, lint, and client build.
+- **Deferred to Task 2**: owner ACCEPTED/REJECTED actions and the project row-lock decision transaction.
+
 ### Joined projects status fix (2026-11-15)
 - **Files changed**: `server/src/modules/projects/projects.service.js`, `projects.test.js`.
 - **Behaviour**: `mine=member` without a status filter returns joined OPEN, IN_PROGRESS, and COMPLETED projects; ARCHIVED remains hidden. Unfiltered lists still default to OPEN, and owned lists keep their existing status behaviour.
