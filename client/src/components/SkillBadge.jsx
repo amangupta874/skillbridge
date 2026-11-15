@@ -1,4 +1,5 @@
 import Badge from './Badge.jsx';
+import { formatLabel } from '../utils/labels.js';
 
 export default function SkillBadge({
   skill,
@@ -14,7 +15,7 @@ export default function SkillBadge({
       <span className="font-medium text-slate-900">{skillName}</span>
       {level && (
         <Badge variant={level} size="sm">
-          {level}
+          {formatLabel(level)}
         </Badge>
       )}
     </div>

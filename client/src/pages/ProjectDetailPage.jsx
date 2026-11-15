@@ -1,21 +1,44 @@
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getProject } from '../api/projects.js';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getProject, updateProject } from '../api/projects.js';
 import Badge from '../components/Badge.jsx';
 import Button from '../components/Button.jsx';
 import Card from '../components/Card.jsx';
+import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
 import SkillBadge from '../components/SkillBadge.jsx';
 import Spinner from '../components/Spinner.jsx';
+import { useToast } from '../components/Toast.jsx';
+import { formatLabel } from '../utils/labels.js';
+import { projectStatusTransitions } from '../utils/projectStatus.js';
 
 export default function ProjectDetailPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const [pendingStatus, setPendingStatus] = useState(null);
   const { id } = useParams();
   const { data: project, isLoading, error, refetch } = useQuery({
     queryKey: ['project', id],
     queryFn: () => getProject(id),
     enabled: Boolean(id),
+  });
+  const changeStatus = useMutation({
+    mutationFn: (status) => updateProject(id, { status }),
+    onSuccess: async (updatedProject) => {
+      setPendingStatus(null);
+      toast.success(`Project status changed to ${formatLabel(updatedProject.status)}.`);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['project', id] }),
+        queryClient.invalidateQueries({ queryKey: ['projects'] }),
+      ]);
+    },
+    onError: (statusError) => {
+      setPendingStatus(null);
+      toast.error(statusError.message);
+    },
   });
 
   if (isLoading) {
@@ -45,8 +68,8 @@ export default function ProjectDetailPage() {
           )}
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Badge variant={project.status}>{project.status.replaceAll('_', ' ')}</Badge>
-          <Badge variant={project.difficulty}>{project.difficulty}</Badge>
+          <Badge variant={project.status}>{formatLabel(project.status)}</Badge>
+          <Badge variant={project.difficulty}>{formatLabel(project.difficulty)}</Badge>
         </div>
         <section className="mt-6">
           <h2 className="text-sm font-semibold text-slate-900">About this project</h2>
@@ -64,9 +87,21 @@ export default function ProjectDetailPage() {
         <section className="mt-6">
           <h2 className="text-sm font-semibold text-slate-900">Required skills</h2>
           <div className="mt-2 flex flex-wrap gap-2">
-            {project.skills.map((skill) => <SkillBadge key={skill.id} skill={skill} level={`Minimum: ${skill.minLevel}`} />)}
+            {project.skills.map((skill) => <SkillBadge key={skill.id} skill={skill} level={formatLabel(skill.minLevel)} />)}
           </div>
         </section>
+        {project.myRole === 'OWNER' && projectStatusTransitions[project.status].length > 0 && (
+          <section className="mt-6 border-t border-slate-100 pt-5">
+            <h2 className="text-sm font-semibold text-slate-900">Project status</h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {projectStatusTransitions[project.status].map((status) => (
+                <Button key={status} variant={status === 'ARCHIVED' ? 'danger' : 'secondary'} disabled={changeStatus.isPending} onClick={() => setPendingStatus(status)}>
+                  {formatLabel(status)}
+                </Button>
+              ))}
+            </div>
+          </section>
+        )}
       </Card>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Card>
@@ -91,6 +126,16 @@ export default function ProjectDetailPage() {
           </dl>
         </Card>
       )}
+      <ConfirmDialog
+        open={Boolean(pendingStatus)}
+        title={`Change project status to ${formatLabel(pendingStatus || '')}?`}
+        message={pendingStatus === 'ARCHIVED' ? 'Archived projects can no longer be edited.' : `This will move the project to ${formatLabel(pendingStatus || '')}.`}
+        confirmLabel={`Set to ${formatLabel(pendingStatus || '')}`}
+        danger={pendingStatus === 'ARCHIVED'}
+        loading={changeStatus.isPending}
+        onCancel={() => setPendingStatus(null)}
+        onConfirm={() => changeStatus.mutate(pendingStatus)}
+      />
     </div>
   );
 }

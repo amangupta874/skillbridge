@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getProjects } from '../api/projects.js';
 import EmptyState from '../components/EmptyState.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
@@ -7,6 +7,7 @@ import Pagination from '../components/Pagination.jsx';
 import ProjectCard from '../components/ProjectCard.jsx';
 import ProjectFilters from '../components/ProjectFilters.jsx';
 import Spinner from '../components/Spinner.jsx';
+import Button from '../components/Button.jsx';
 
 const defaultLimit = '12';
 
@@ -24,6 +25,7 @@ function filtersFromParams(params) {
 }
 
 export default function ProjectsPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = filtersFromParams(searchParams);
   const page = Number(filters.page || 1);
@@ -58,9 +60,12 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Discover projects</h1>
-        <p className="mt-1 text-sm text-slate-600">Find a project and bring your skills to a team.</p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Discover projects</h1>
+          <p className="mt-1 text-sm text-slate-600">Find a project and bring your skills to a team.</p>
+        </div>
+        <Button onClick={() => navigate('/projects/new')}>Create project</Button>
       </header>
       <ProjectFilters filters={filters} onChange={updateFilters} onClear={clearFilters} />
       {isLoading ? (

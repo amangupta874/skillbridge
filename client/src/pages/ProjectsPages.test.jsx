@@ -64,9 +64,9 @@ describe('project discovery', () => {
     );
 
     expect(screen.getByText('2 seats left')).toBeInTheDocument();
-    expect(screen.getByText('OPEN')).toBeInTheDocument();
-    expect(screen.getByText('ADVANCED')).toBeInTheDocument();
-    expect(screen.getByText('INTERMEDIATE')).toBeInTheDocument();
+    expect(screen.getByText('Open')).toBeInTheDocument();
+    expect(screen.getByText('Advanced')).toBeInTheDocument();
+    expect(screen.getByText('Intermediate')).toBeInTheDocument();
   });
 
   it('shows an empty state with a clear filters button', async () => {
