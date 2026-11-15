@@ -7,7 +7,7 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [x] 4 users backend (plan D4 backend)                 - [x] 5 profile backend (plan D5 backend)
 - [x] 6 deploy database + API (plan D6; done 2026-11-14) - [ ] 7 review (plan D7)
 - [x] 8 projects backend (plan D8)                      - [x] 9 applications backend (plan D11)
-- [ ] 10 decide + row lock + concurrency test (plan D12)- [ ] 11 exchanges backend (plan D15)
+- [x] 10 decide + row lock + concurrency test (plan D12)- [ ] 11 exchanges backend (plan D15)
 - [ ] 12 matching backend (plan D17)                    - [ ] 13 notifications backend (plan D19 backend)
 - [ ] 14 analytics endpoint + redeploy API (plan D20 backend)  - [ ] 15 backend hardening (plan D22)
 - [ ] 16 observability + performance (plan D25)         - [ ] 17 demo seed + concurrency script (plan D26)
@@ -15,6 +15,13 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Day 12 (Deciding applications — 2026-11-15)
+- **Files changed**: `server/src/modules/applications/applications.schema.js`, `applications.controller.js`, `applications.service.js`, and `applications.test.js`.
+- **Behaviour**: owner ACCEPTED and REJECTED decisions run in a transaction with a project-row lock, re-read the application after locking, and check project status and seats before accepting. Member, application status, and decision notification commit together. DTO transitions depend on the caller.
+- **Tests added**: accept/member/notification, reject notification, deciding twice, full team, non-OPEN project, non-owner, plus the required last-seat concurrency case.
+- **Manual check**: the Supertest concurrency test ran 20 simultaneous-accept rounds; every round returned one 200 and one 409, with two project member rows and one APPLICATION_ACCEPTED notification.
+- **Verification**: `npm run verify` passed: 105 server tests, 51 client tests, lint, and client build. All 20 concurrency rounds passed.
+
 ### Day 11 (Applications backend — 2026-11-15)
 - **Files created**: `server/src/modules/applications/applications.routes.js`, `applications.schema.js`, `applications.controller.js`, `applications.service.js`, `applications.test.js`, and `transitions.js` / `transitions.test.js`.
 - **Files changed**: `server/src/routes.js` mounts the application routes before the generic users route so `/users/me/applications` matches correctly.

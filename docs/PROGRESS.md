@@ -1,12 +1,12 @@
 # PROGRESS (the agent updates this file at the end of every task and every day)
 
-Last verified: 2026-11-14, npm run verify passed        Live URL: https://skillbridge-seven-tau.vercel.app        API URL: https://skillbridge-6dhg.onrender.com        Repo: https://github.com/amangupta874/skillbridge.git
+Last verified: 2026-11-15, npm run verify passed        Live URL: https://skillbridge-seven-tau.vercel.app        API URL: https://skillbridge-6dhg.onrender.com        Repo: https://github.com/amangupta874/skillbridge.git
 
 ## Status by day (tick when DONE per docs/10 "Done when")
 - [x] D1 setup, database, repository      - [ ] D2 auth backend              - [ ] D3 helpers, lookups, skills, client foundation
 - [ ] D4 auth pages, users backend        - [ ] D5 profile                    - [x] D6 first deployment (done 2026-11-14)
 - [ ] D7 buffer/review                    - [x] D8 projects backend           - [ ] D9 discovery UI
-- [ ] D10 project form, my projects       - [ ] D11 applications backend      - [ ] D12 deciding + row lock + concurrency test
+- [ ] D10 project form, my projects       - [x] D11 applications backend      - [x] D12 deciding + row lock + concurrency test
 - [ ] D13 applications UI                 - [ ] D14 buffer/redeploy           - [ ] D15 exchanges backend
 - [ ] D16 exchanges UI, people            - [ ] D17 matching backend          - [ ] D18 matching UI
 - [ ] D19 notifications                   - [ ] D20 dashboard, trends         - [ ] D21 buffer/regression on live
@@ -33,3 +33,5 @@ Day 8 projects backend completed on 2026-11-14. `npm run verify` passed with the
 
 ## Verification log
 2026-11-03: npm run verify -> PASS (oxlint, eslint, vitest server 14/14, vitest client 3/3, vite build)
+
+2026-11-15: applications endpoints and row-lock decisions -> `npm run verify` PASS (105 server tests, 51 client tests, lint, build); all 20 last-seat concurrency rounds passed.

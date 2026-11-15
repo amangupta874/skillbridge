@@ -21,6 +21,6 @@ export async function listMyApplications(req, res) {
 }
 
 export async function updateApplication(req, res) {
-  const application = await applicationsService.withdrawApplication(req.valid.params.id, req.user.id);
+  const application = await applicationsService.changeApplicationStatus(req.valid.params.id, req.user.id, req.valid.body.status);
   sendData(res, application);
 }
