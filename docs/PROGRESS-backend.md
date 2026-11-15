@@ -15,6 +15,13 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Joined projects status fix (2026-11-15)
+- **Files changed**: `server/src/modules/projects/projects.service.js`, `projects.test.js`.
+- **Behaviour**: `mine=member` without a status filter returns joined OPEN, IN_PROGRESS, and COMPLETED projects; ARCHIVED remains hidden. Unfiltered lists still default to OPEN, and owned lists keep their existing status behaviour.
+- **Tests added**: a joined project remains visible after moving to IN_PROGRESS and disappears after ARCHIVED; the unfiltered default still returns only OPEN projects.
+- **Manual check**: exercised the project status and member-list flow through the Supertest integration suite.
+- **Verification**: `npm run verify` passed: 83 server tests, 51 client tests, lint, and client build.
+
 ### Day 8 (Projects backend — 2026-11-14)
 - **Files created**: `server/src/modules/projects/projects.schema.js`, `projects.controller.js`, `projects.service.js`, `projects.routes.js`, `transitions.js`, `projects.test.js`, and `transitions.test.js`.
 - **Files changed**: `server/src/routes.js` mounts the projects router.

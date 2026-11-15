@@ -113,10 +113,12 @@ export async function updateProject(projectId, callerId, input) {
 export async function listProjects(callerId, input) {
   const skillIds = input.skillIds ? input.skillIds.split(',').map(Number) : [];
   const owned = input.mine === 'owned';
+  const memberStatuses = ['OPEN', 'IN_PROGRESS', 'COMPLETED'];
   const where = {
     ...(input.mine === 'owned' && { ownerId: callerId }),
     ...(input.mine === 'member' && { members: { some: { userId: callerId } } }),
-    ...(!owned && { status: input.status ?? 'OPEN' }),
+    ...(input.mine === 'member' && { status: input.status ?? { in: memberStatuses } }),
+    ...(!owned && input.mine !== 'member' && { status: input.status ?? 'OPEN' }),
     ...(owned && input.status && { status: input.status }),
     ...(input.categoryId && { categoryId: input.categoryId }),
     ...(input.difficulty && { difficulty: input.difficulty }),
