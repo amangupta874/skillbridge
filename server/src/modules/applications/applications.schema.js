@@ -26,7 +26,7 @@ export const listMyApplicationsSchema = z.object({
 });
 
 export const updateApplicationSchema = z.object({
-  body: z.object({ status: z.literal('WITHDRAWN') }),
+  body: z.object({ status: z.enum(['ACCEPTED', 'REJECTED', 'WITHDRAWN']) }),
   query: z.object({}).optional(),
   params: z.object({ id: z.string().uuid() }),
 });

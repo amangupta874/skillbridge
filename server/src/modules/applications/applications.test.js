@@ -155,4 +155,112 @@ describe('applications endpoints', () => {
     const response = await request(app).get('/api/users/me/applications');
     expect(response.status).toBe(401);
   });
+
+  test('accept application creates the member, notification, and status change', async () => {
+    const { owner, project } = await setupProject();
+    const applicant = await registerUser();
+    const created = await applicant.agent.post(`/api/projects/${project.id}/applications`).send({ message: applicationMessage });
+    const response = await owner.agent.patch(`/api/applications/${created.body.data.id}`).send({ status: 'ACCEPTED' });
+    const member = await prisma.projectMember.findUnique({ where: { projectId_userId: { projectId: project.id, userId: applicant.user.id } } });
+    const notification = await prisma.notification.findFirst({ where: { applicationId: created.body.data.id, type: 'APPLICATION_ACCEPTED' } });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.status).toBe('ACCEPTED');
+    expect(response.body.data.decidedAt).not.toBeNull();
+    expect(member).not.toBeNull();
+    expect(notification).toMatchObject({ recipientId: applicant.user.id, type: 'APPLICATION_ACCEPTED' });
+  });
+
+  test('reject application creates a notification', async () => {
+    const { owner, project } = await setupProject();
+    const applicant = await registerUser();
+    const created = await applicant.agent.post(`/api/projects/${project.id}/applications`).send({ message: applicationMessage });
+    const response = await owner.agent.patch(`/api/applications/${created.body.data.id}`).send({ status: 'REJECTED' });
+    const notification = await prisma.notification.findFirst({ where: { applicationId: created.body.data.id, type: 'APPLICATION_REJECTED' } });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.status).toBe('REJECTED');
+    expect(notification.recipientId).toBe(applicant.user.id);
+  });
+
+  test('deciding twice returns 409', async () => {
+    const { owner, project } = await setupProject();
+    const applicant = await registerUser();
+    const created = await applicant.agent.post(`/api/projects/${project.id}/applications`).send({ message: applicationMessage });
+    await owner.agent.patch(`/api/applications/${created.body.data.id}`).send({ status: 'REJECTED' });
+    const response = await owner.agent.patch(`/api/applications/${created.body.data.id}`).send({ status: 'ACCEPTED' });
+    expect(response.status).toBe(409);
+  });
+
+  test('accepting into a full team returns 409', async () => {
+    const { owner, project } = await setupProject();
+    const member = await registerUser();
+    const applicant = await registerUser();
+    await prisma.project.update({ where: { id: project.id }, data: { maxTeamSize: 2 } });
+    await prisma.projectMember.create({ data: { projectId: project.id, userId: member.user.id } });
+    const created = await applicant.agent.post(`/api/projects/${project.id}/applications`).send({ message: applicationMessage });
+    const response = await owner.agent.patch(`/api/applications/${created.body.data.id}`).send({ status: 'ACCEPTED' });
+    expect(response.status).toBe(409);
+  });
+
+  test('accepting after a project leaves OPEN returns 409', async () => {
+    const { owner, project } = await setupProject();
+    const applicant = await registerUser();
+    const created = await applicant.agent.post(`/api/projects/${project.id}/applications`).send({ message: applicationMessage });
+    await owner.agent.patch(`/api/projects/${project.id}`).send({ status: 'IN_PROGRESS' });
+    const response = await owner.agent.patch(`/api/applications/${created.body.data.id}`).send({ status: 'ACCEPTED' });
+    expect(response.status).toBe(409);
+  });
+
+  test('non-owner gets 403 when deciding an application', async () => {
+    const { project } = await setupProject();
+    const applicant = await registerUser();
+    const stranger = await registerUser();
+    const created = await applicant.agent.post(`/api/projects/${project.id}/applications`).send({ message: applicationMessage });
+    const response = await stranger.agent.patch(`/api/applications/${created.body.data.id}`).send({ status: 'ACCEPTED' });
+    expect(response.status).toBe(403);
+  });
+
+  test('two simultaneous accepts for the last seat -> exactly one succeeds', async () => {
+    const { owner, project } = await setupProject();
+    await prisma.project.update({ where: { id: project.id }, data: { maxTeamSize: 3 } });
+    const existingMember = await registerUser();
+    const firstApplicant = await registerUser();
+    const secondApplicant = await registerUser();
+    await prisma.projectMember.create({ data: { projectId: project.id, userId: existingMember.user.id } });
+    const firstApplication = await prisma.projectApplication.create({
+      data: { projectId: project.id, applicantId: firstApplicant.user.id, message: applicationMessage },
+    });
+    const secondApplication = await prisma.projectApplication.create({
+      data: { projectId: project.id, applicantId: secondApplicant.user.id, message: applicationMessage },
+    });
+
+    for (let run = 0; run < 20; run += 1) {
+      const responses = await Promise.all([
+        owner.agent.patch(`/api/applications/${firstApplication.id}`).send({ status: 'ACCEPTED' }),
+        owner.agent.patch(`/api/applications/${secondApplication.id}`).send({ status: 'ACCEPTED' }),
+      ]);
+      const responseStatuses = responses.map(({ status }) => status).sort();
+      const memberCount = await prisma.projectMember.count({ where: { projectId: project.id } });
+      const acceptedNotifications = await prisma.notification.count({
+        where: { applicationId: { in: [firstApplication.id, secondApplication.id] }, type: 'APPLICATION_ACCEPTED' },
+      });
+      const applicationStatuses = await prisma.projectApplication.findMany({
+        where: { id: { in: [firstApplication.id, secondApplication.id] } },
+        select: { status: true },
+      });
+
+      expect(responseStatuses).toEqual([200, 409]);
+      expect(memberCount).toBe(2);
+      expect(acceptedNotifications).toBe(1);
+      expect(applicationStatuses.filter(({ status }) => status === 'ACCEPTED')).toHaveLength(1);
+
+      await prisma.notification.deleteMany({ where: { applicationId: { in: [firstApplication.id, secondApplication.id] } } });
+      await prisma.projectMember.deleteMany({ where: { projectId: project.id, userId: { in: [firstApplicant.user.id, secondApplicant.user.id] } } });
+      await prisma.projectApplication.updateMany({
+        where: { id: { in: [firstApplication.id, secondApplication.id] } },
+        data: { status: 'PENDING', decidedAt: null },
+      });
+    }
+  });
 });
