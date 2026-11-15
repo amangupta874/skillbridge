@@ -92,15 +92,13 @@ describe('EditProfilePage', () => {
   it('renders all 5 profile sections with preloaded user data', async () => {
     renderWithProviders();
 
-    await waitFor(() => {
-      expect(screen.getByText('1. Basic Information')).toBeInTheDocument();
-      expect(screen.getByText('2. Links')).toBeInTheDocument();
-      expect(screen.getByText('3. Interests')).toBeInTheDocument();
-      expect(screen.getByText('4. Known Skills & Proficiency')).toBeInTheDocument();
-      expect(screen.getByText('5. Learning Goals')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByDisplayValue('Alice Chen')).toBeInTheDocument());
 
-    expect(screen.getByDisplayValue('Alice Chen')).toBeInTheDocument();
+    expect(screen.getByText('1. Basic Information')).toBeInTheDocument();
+    expect(screen.getByText('2. Links')).toBeInTheDocument();
+    expect(screen.getByText('3. Interests')).toBeInTheDocument();
+    expect(screen.getByText('4. Known Skills & Proficiency')).toBeInTheDocument();
+    expect(screen.getByText('5. Learning Goals')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Initial bio text.')).toBeInTheDocument();
     expect(screen.getByDisplayValue('12')).toBeInTheDocument();
   });

@@ -60,6 +60,7 @@ export default function AppLayout() {
 
             {/* Desktop User Actions */}
             <div className="hidden md:flex items-center gap-4">
+              <Link to="/projects/new" className="text-sm font-medium text-indigo-700 hover:text-indigo-900">Create project</Link>
               {user && (
                 <div className="flex items-center gap-3">
                   <Link
@@ -141,6 +142,13 @@ export default function AppLayout() {
                     className="block px-3 py-2 text-sm text-indigo-600 font-medium"
                   >
                     Edit profile
+                  </Link>
+                  <Link
+                    to="/projects/new"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 text-sm text-indigo-600 font-medium"
+                  >
+                    Create project
                   </Link>
                   <Button
                     variant="secondary"

@@ -10,6 +10,7 @@ export default function SkillPicker({
   withLevel = false,
   excludedSkillIds = [],
   maxItems = 30,
+  levels = SKILL_LEVELS,
   label = 'Add Skills',
   error = null,
   className = '',
@@ -205,7 +206,7 @@ export default function SkillPicker({
                 onChange={(e) => setSelectedLevel(e.target.value)}
                 className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-2xs focus:border-indigo-500 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
               >
-                {SKILL_LEVELS.map((level) => (
+                {levels.map((level) => (
                   <option key={level} value={level}>
                     {level}
                   </option>
@@ -243,7 +244,7 @@ export default function SkillPicker({
                   onChange={(e) => handleLevelChange(idx, e.target.value)}
                   className="rounded border border-slate-200 bg-slate-50 px-1 py-0.5 text-2xs font-semibold text-slate-700 focus:outline-hidden"
                 >
-                  {SKILL_LEVELS.map((lvl) => (
+                  {levels.map((lvl) => (
                     <option key={lvl} value={lvl}>
                       {lvl}
                     </option>

@@ -90,7 +90,7 @@ describe('PublicProfilePage', () => {
 
     // Skills
     expect(screen.getByText('React')).toBeInTheDocument();
-    expect(screen.getByText('ADVANCED')).toBeInTheDocument();
+    expect(screen.getByText('Advanced')).toBeInTheDocument();
     expect(screen.getByText('Node.js')).toBeInTheDocument();
 
     // Goals and interests
