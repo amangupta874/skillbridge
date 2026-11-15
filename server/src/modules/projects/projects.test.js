@@ -143,6 +143,31 @@ describe('projects endpoints', () => {
     expect(joined.body.data.map(({ id }) => id)).toEqual([joinedProject.id]);
   });
 
+  test('member list includes a joined project after it starts and hides it after archive', async () => {
+    const { owner, category, skill } = await setup();
+    const member = await registerUser();
+    const project = await createProject(owner.agent, category.id, skill.id, { status: 'OPEN' });
+    await prisma.projectMember.create({ data: { projectId: project.id, userId: member.user.id } });
+
+    await owner.agent.patch(`/api/projects/${project.id}`).send({ status: 'IN_PROGRESS' });
+    const started = await member.agent.get('/api/projects?mine=member');
+    expect(started.body.data.map(({ id }) => id)).toContain(project.id);
+
+    await owner.agent.patch(`/api/projects/${project.id}`).send({ status: 'ARCHIVED' });
+    const archived = await member.agent.get('/api/projects?mine=member');
+    expect(archived.body.data.map(({ id }) => id)).not.toContain(project.id);
+  });
+
+  test('project list without mine still defaults to open projects', async () => {
+    const { owner, category, skill } = await setup();
+    const open = await createProject(owner.agent, category.id, skill.id, { status: 'OPEN' });
+    const started = await createProject(owner.agent, category.id, skill.id, { status: 'OPEN' });
+    await owner.agent.patch(`/api/projects/${started.id}`).send({ status: 'IN_PROGRESS' });
+
+    const response = await owner.agent.get('/api/projects');
+    expect(response.body.data.map(({ id }) => id)).toEqual([open.id]);
+  });
+
   test('returns stable pagination metadata and an empty page', async () => {
     const { owner, category, skill } = await setup();
     await createProject(owner.agent, category.id, skill.id, { status: 'OPEN' });
