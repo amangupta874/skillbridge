@@ -207,6 +207,27 @@ describe('PUT /api/users/me/skills', () => {
 
     expect(response.status).toBe(400);
   });
+
+  test('does not remove a skill offered in an active exchange', async () => {
+    const sender = await registerUser();
+    const recipient = await registerUser();
+    const offered = await createSkill('Exchange offer');
+    const requested = await createSkill('Exchange request');
+    await sender.agent.put('/api/users/me/skills').send({ skills: [{ skillId: offered.id, level: 'INTERMEDIATE' }] });
+    await recipient.agent.put('/api/users/me/skills').send({ skills: [{ skillId: requested.id, level: 'BEGINNER' }] });
+    await sender.agent.post('/api/exchanges').send({
+      recipientId: recipient.user.id,
+      offeredSkillId: offered.id,
+      requestedSkillId: requested.id,
+      message: 'I can help you learn this skill.',
+    });
+
+    const response = await sender.agent.put('/api/users/me/skills').send({ skills: [] });
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.message).toMatch(/active exchange/i);
+    expect(await prisma.userSkill.findUnique({ where: { userId_skillId: { userId: sender.user.id, skillId: offered.id } } })).not.toBeNull();
+  });
 });
 
 describe('PUT /api/users/me/learning-goals', () => {

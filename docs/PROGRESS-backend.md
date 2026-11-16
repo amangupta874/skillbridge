@@ -7,7 +7,7 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [x] 4 users backend (plan D4 backend)                 - [x] 5 profile backend (plan D5 backend)
 - [x] 6 deploy database + API (plan D6; done 2026-11-14) - [ ] 7 review (plan D7)
 - [x] 8 projects backend (plan D8)                      - [x] 9 applications backend (plan D11)
-- [x] 10 decide + row lock + concurrency test (plan D12)- [ ] 11 exchanges backend (plan D15)
+- [x] 10 decide + row lock + concurrency test (plan D12)- [x] 11 exchanges backend (plan D15)
 - [ ] 12 matching backend (plan D17)                    - [ ] 13 notifications backend (plan D19 backend)
 - [ ] 14 analytics endpoint + redeploy API (plan D20 backend)  - [ ] 15 backend hardening (plan D22)
 - [ ] 16 observability + performance (plan D25)         - [ ] 17 demo seed + concurrency script (plan D26)
@@ -15,6 +15,15 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Day 15 (Exchanges backend — 2026-11-16)
+- **Files created**: `server/src/modules/exchanges/exchanges.routes.js`, `exchanges.schema.js`, `exchanges.controller.js`, `exchanges.service.js`, `exchanges.test.js`, and `transitions.js` / `transitions.test.js`.
+- **Files changed**: `server/src/routes.js` mounts the exchanges router; `server/src/modules/users/users.service.js` blocks removing a skill offered in a PENDING or ACCEPTED exchange; `users.test.js` covers that conflict.
+- **Endpoints**: create, filtered/paginated incoming/outgoing/all lists, and participant status changes. Exchange notifications are created in the same transaction. DTOs include the caller's allowed transitions.
+- **Tests added**: 14 covering creation validation and notification, active duplicates and reopening after REJECTED/CANCELLED, allowed and illegal transition pairs and actors, notifications, participant privacy, filters, pagination, authentication, and offered-skill removal.
+- **Manual check**: Exchange HTTP flows were exercised through Supertest integration tests against the test database, including transaction-created notifications and skill removal rejection.
+- **Verification**: `npm run verify` passed: 119 server tests, 61 client tests, lint, and client build.
+- **Deferred**: Nothing for the Day 15 scope.
+
 ### Day 12 (Deciding applications — 2026-11-15)
 - **Files changed**: `server/src/modules/applications/applications.schema.js`, `applications.controller.js`, `applications.service.js`, and `applications.test.js`.
 - **Behaviour**: owner ACCEPTED and REJECTED decisions run in a transaction with a project-row lock, re-read the application after locking, and check project status and seats before accepting. Member, application status, and decision notification commit together. DTO transitions depend on the caller.
