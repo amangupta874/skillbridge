@@ -1,5 +1,5 @@
 import { prisma } from '../../config/prisma.js';
-import { badRequest, notFound } from '../../utils/errors.js';
+import { badRequest, conflict, notFound } from '../../utils/errors.js';
 
 const userPublicSelect = {
   id: true,
@@ -131,6 +131,17 @@ export async function updateSkills(userId, skills) {
       select: { skillId: true },
     });
     if (goals.length) throw badRequest('A skill cannot be both known and a learning goal');
+
+    const currentSkills = await tx.userSkill.findMany({ where: { userId }, select: { skillId: true } });
+    const retainedSkillIds = new Set(skillIds);
+    const removedSkillIds = currentSkills.map(({ skillId }) => skillId).filter((skillId) => !retainedSkillIds.has(skillId));
+    if (removedSkillIds.length) {
+      const activeExchange = await tx.skillExchange.findFirst({
+        where: { senderId: userId, offeredSkillId: { in: removedSkillIds }, status: { in: ['PENDING', 'ACCEPTED'] } },
+        select: { id: true },
+      });
+      if (activeExchange) throw conflict('You cannot remove a skill offered in an active exchange');
+    }
 
     await tx.userSkill.deleteMany({ where: { userId } });
     if (skills.length) {
