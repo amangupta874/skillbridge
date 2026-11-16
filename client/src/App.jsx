@@ -15,6 +15,8 @@ import ProjectsPage from './pages/ProjectsPage.jsx';
 import ProjectDetailPage from './pages/ProjectDetailPage.jsx';
 import ProjectFormPage from './pages/ProjectFormPage.jsx';
 import MyProjectsPage from './pages/MyProjectsPage.jsx';
+import ProjectApplicationsPage from './pages/ProjectApplicationsPage.jsx';
+import ApplicationsPage from './pages/ApplicationsPage.jsx';
 import { PlaceholderPage, NotFoundPage } from './pages/PlaceholderPage.jsx';
 
 export function createQueryClient() {
@@ -56,8 +58,10 @@ export default function App({ client }) {
                 <Route path="/projects" element={<ProjectsPage />} />
                 <Route path="/projects/new" element={<ProjectFormPage />} />
                 <Route path="/projects/:id/edit" element={<ProjectFormPage edit />} />
+                <Route path="/projects/:id/applications" element={<ProjectApplicationsPage />} />
                 <Route path="/projects/:id" element={<ProjectDetailPage />} />
                 <Route path="/my-projects" element={<MyProjectsPage />} />
+                <Route path="/applications" element={<ApplicationsPage />} />
                 <Route
                   path="/exchanges"
                   element={<PlaceholderPage title="Skill Exchanges" description="Collaborate and exchange skills with peers." />}
