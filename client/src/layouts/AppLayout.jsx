@@ -17,6 +17,7 @@ export default function AppLayout() {
     { to: '/', label: 'Dashboard' },
     { to: '/projects', label: 'Projects' },
     { to: '/my-projects', label: 'My Projects' },
+    { to: '/applications', label: 'My applications' },
     { to: '/exchanges', label: 'Exchanges' },
     { to: '/people', label: 'People' },
     { to: '/notifications', label: 'Notifications' },

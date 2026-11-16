@@ -1,25 +1,41 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getProject, updateProject } from '../api/projects.js';
+import { applyToProject, updateApplicationStatus } from '../api/applications.js';
 import Badge from '../components/Badge.jsx';
 import Button from '../components/Button.jsx';
 import Card from '../components/Card.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
+import Modal from '../components/Modal.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
 import SkillBadge from '../components/SkillBadge.jsx';
+import Textarea from '../components/Textarea.jsx';
 import Spinner from '../components/Spinner.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { formatLabel } from '../utils/labels.js';
 import { projectStatusTransitions } from '../utils/projectStatus.js';
+import { applicationSchema } from '../schemas/application.schema.js';
+import { fieldErrorsFromApiError } from '../api/client.js';
 
 export default function ProjectDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
   const [pendingStatus, setPendingStatus] = useState(null);
+  const [showApplyDialog, setShowApplyDialog] = useState(false);
+  const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const { id } = useParams();
+  const {
+    register: registerApplication,
+    handleSubmit: handleApplicationSubmit,
+    setError: setApplicationError,
+    reset: resetApplication,
+    formState: { errors: applicationErrors },
+  } = useForm({ resolver: zodResolver(applicationSchema), defaultValues: { message: '' } });
   const { data: project, isLoading, error, refetch } = useQuery({
     queryKey: ['project', id],
     queryFn: () => getProject(id),
@@ -38,6 +54,38 @@ export default function ProjectDetailPage() {
     onError: (statusError) => {
       setPendingStatus(null);
       toast.error(statusError.message);
+    },
+  });
+  const sendApplication = useMutation({
+    mutationFn: (message) => applyToProject(id, message),
+    onSuccess: async () => {
+      setShowApplyDialog(false);
+      resetApplication();
+      toast.success('Your application was sent.');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['project', id] }),
+        queryClient.invalidateQueries({ queryKey: ['applications'] }),
+      ]);
+    },
+    onError: (applicationError) => {
+      const fieldErrors = fieldErrorsFromApiError(applicationError);
+      if (fieldErrors.message) setApplicationError('message', { type: 'server', message: fieldErrors.message });
+      else toast.error(applicationError.message);
+    },
+  });
+  const withdrawApplication = useMutation({
+    mutationFn: () => updateApplicationStatus(project.myApplication.id, 'WITHDRAWN'),
+    onSuccess: async () => {
+      setConfirmWithdraw(false);
+      toast.success('Your application was withdrawn.');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['project', id] }),
+        queryClient.invalidateQueries({ queryKey: ['applications'] }),
+      ]);
+    },
+    onError: (withdrawError) => {
+      setConfirmWithdraw(false);
+      toast.error(withdrawError.message);
     },
   });
 
@@ -102,6 +150,23 @@ export default function ProjectDetailPage() {
             </div>
           </section>
         )}
+        {project.myRole === 'OWNER' ? (
+          <section className="mt-6 border-t border-slate-100 pt-5">
+            <Link to={`/projects/${project.id}/applications`}><Button variant="secondary">View applications</Button></Link>
+          </section>
+        ) : (
+          <section className="mt-6 border-t border-slate-100 pt-5">
+            {project.myApplication?.status === 'PENDING' ? (
+              <Button variant="secondary" onClick={() => setConfirmWithdraw(true)}>Withdraw application</Button>
+            ) : ['ACCEPTED', 'REJECTED'].includes(project.myApplication?.status) ? (
+              <Badge variant={project.myApplication.status}>{formatLabel(project.myApplication.status)}</Badge>
+            ) : project.status === 'OPEN' && !project.isFull ? (
+              <Button onClick={() => setShowApplyDialog(true)}>Apply</Button>
+            ) : (
+              <p className="text-sm text-slate-600">{project.isFull ? 'This project is full.' : 'This project is not accepting applications.'}</p>
+            )}
+          </section>
+        )}
       </Card>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Card>
@@ -135,6 +200,35 @@ export default function ProjectDetailPage() {
         loading={changeStatus.isPending}
         onCancel={() => setPendingStatus(null)}
         onConfirm={() => changeStatus.mutate(pendingStatus)}
+      />
+      <Modal open={showApplyDialog} title="Apply to this project" onClose={() => !sendApplication.isPending && setShowApplyDialog(false)}>
+        <form className="space-y-4" onSubmit={handleApplicationSubmit(({ message }) => sendApplication.mutate(message))} noValidate>
+          <Textarea
+            label="Message to the project owner"
+            name="message"
+            required
+            rows={5}
+            minLength={10}
+            maxLength={500}
+            hint="Tell the owner how you can help (10 to 500 characters)."
+            error={applicationErrors.message?.message}
+            {...registerApplication('message')}
+          />
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" disabled={sendApplication.isPending} onClick={() => setShowApplyDialog(false)}>Cancel</Button>
+            <Button type="submit" loading={sendApplication.isPending}>Send application</Button>
+          </div>
+        </form>
+      </Modal>
+      <ConfirmDialog
+        open={confirmWithdraw}
+        title="Withdraw your application?"
+        message="The project owner will no longer see your application as pending. You can apply again later."
+        confirmLabel="Withdraw application"
+        danger
+        loading={withdrawApplication.isPending}
+        onCancel={() => setConfirmWithdraw(false)}
+        onConfirm={() => withdrawApplication.mutate()}
       />
     </div>
   );
