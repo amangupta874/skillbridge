@@ -2,6 +2,15 @@ import { app } from './app.js';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
 import { prisma } from './config/prisma.js';
+import { cleanupExpiredSessions } from './utils/sessionCleanup.js';
+
+function runSessionCleanup() {
+  cleanupExpiredSessions().catch((error) => logger.error({ err: error }, 'Session cleanup failed'));
+}
+
+runSessionCleanup();
+const sessionCleanupTimer = setInterval(runSessionCleanup, 6 * 60 * 60 * 1000);
+sessionCleanupTimer.unref();
 
 const server = app.listen(env.PORT, () => logger.info(`API listening on port ${env.PORT}`));
 
