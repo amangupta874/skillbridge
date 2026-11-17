@@ -8,13 +8,22 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [x] 6 deploy database + API (plan D6; done 2026-11-14) - [ ] 7 review (plan D7)
 - [x] 8 projects backend (plan D8)                      - [x] 9 applications backend (plan D11)
 - [x] 10 decide + row lock + concurrency test (plan D12)- [x] 11 exchanges backend (plan D15)
-- [ ] 12 matching backend (plan D17)                    - [ ] 13 notifications backend (plan D19 backend)
+- [x] 12 matching backend (plan D17)                    - [ ] 13 notifications backend (plan D19 backend)
 - [ ] 14 analytics endpoint + redeploy API (plan D20 backend)  - [ ] 15 backend hardening (plan D22)
 - [ ] 16 observability + performance (plan D25)         - [ ] 17 demo seed + concurrency script (plan D26)
 - [ ] 18 live regression         - [ ] 19 backend fixes + reviews   - [ ] 20 API docs + deployment notes
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Day 17 (Matching backend — 2026-11-17)
+- **Files created**: `server/src/modules/matching/matching.routes.js`, `matching.schema.js`, `matching.controller.js`, `matching.service.js`, and `matching.test.js`.
+- **Files changed**: `server/src/modules/projects/projects.routes.js` mounts the matching route before project detail handling.
+- **Endpoint**: owner-only match list with bulk team/candidate skill and learning-goal queries, top-three skill cards, score ordering, and a capped result limit. The existing `scoreCandidate.js` was left unchanged.
+- **Tests added**: 9 covering owner access, missing projects, team exclusion, ranking, learning-only candidates, zero-score exclusion, no required skills, limit, and authentication.
+- **Manual check**: Matching requests were exercised through Supertest integration tests against the test database.
+- **Verification**: `npm run verify` passed: 128 server tests, 74 client tests, lint, and client build.
+- **Deferred**: Nothing for this task.
+
 ### Day 15 (Exchanges backend — 2026-11-16)
 - **Files created**: `server/src/modules/exchanges/exchanges.routes.js`, `exchanges.schema.js`, `exchanges.controller.js`, `exchanges.service.js`, `exchanges.test.js`, and `transitions.js` / `transitions.test.js`.
 - **Files changed**: `server/src/routes.js` mounts the exchanges router; `server/src/modules/users/users.service.js` blocks removing a skill offered in a PENDING or ACCEPTED exchange; `users.test.js` covers that conflict.
