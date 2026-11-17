@@ -81,6 +81,8 @@ describe('error handling pipeline (Express 5 + zod 4)', () => {
     expect(response.status).toBe(500);
     expect(response.body.error.code).toBe('INTERNAL_ERROR');
     expect(JSON.stringify(response.body)).not.toContain('secret internal detail');
+    expect(response.body).not.toHaveProperty('stack');
+    expect(JSON.stringify(response.body)).not.toMatch(/\\n\s+at /);
   });
 
   test('origin check blocks a state-changing request from another origin and allows the client origin', async () => {

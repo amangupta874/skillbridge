@@ -9,12 +9,21 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [x] 8 projects backend (plan D8)                      - [x] 9 applications backend (plan D11)
 - [x] 10 decide + row lock + concurrency test (plan D12)- [x] 11 exchanges backend (plan D15)
 - [x] 12 matching backend (plan D17)                    - [x] 13 notifications backend (plan D19 backend)
-- [ ] 14 analytics endpoint + redeploy API (plan D20 backend)  - [ ] 15 backend hardening (plan D22)
+- [ ] 14 analytics endpoint + redeploy API (plan D20 backend)  - [x] 15 backend hardening (plan D22)
 - [ ] 16 observability + performance (plan D25)         - [ ] 17 demo seed + concurrency script (plan D26)
 - [ ] 18 live regression         - [ ] 19 backend fixes + reviews   - [ ] 20 API docs + deployment notes
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Day 22 (Backend hardening — 2026-11-17)
+- **Files created**: `server/src/security.test.js`, `server/src/middleware/rateLimiters.test.js`, `server/src/config/logger.test.js`, `server/src/utils/sessionCleanup.js`, and `sessionCleanup.test.js`; `docs/security-notes.md` records the audit and security checks.
+- **Files changed**: `server/src/middleware/rateLimiters.js` exposes a configurable test factory while preserving `authLimiter`; `server/src/server.js` removes expired sessions at startup and every six hours; `server/src/config/logger.js` exports the options used by the configured logger; `server/src/middleware/middleware.test.js` checks generic error responses have no stack trace.
+- **Tests added**: 39 covering unauthenticated access to every protected route, valid and malformed ids, stranger authorization, response-field privacy, rate limiting, session cleanup, and log redaction.
+- **Audit**: `npm audit --omit=dev` reported 5 vulnerabilities (3 high, 2 moderate). The offered fixes require Prisma 7 and React Router 7 major upgrades, which violate the pinned stack; see `docs/security-notes.md`.
+- **Manual check**: Security checks ran through the test suite, including a tiny Express limiter app and a captured Pino log output.
+- **Verification**: `npm run verify` passed: 175 server tests, 77 client tests, lint, and client build.
+- **Deferred**: Dependency upgrades remain subject to a future stack decision because audit fixes require major upgrades.
+
 ### Day 19 (Notifications backend — 2026-11-17)
 - **Files created**: `server/src/modules/notifications/notifications.routes.js`, `notifications.schema.js`, `notifications.controller.js`, `notifications.service.js`, and `notifications.test.js`.
 - **Files changed**: `server/src/routes.js` mounts the notifications routes.
