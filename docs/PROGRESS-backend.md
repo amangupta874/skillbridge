@@ -10,11 +10,22 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [x] 10 decide + row lock + concurrency test (plan D12)- [x] 11 exchanges backend (plan D15)
 - [x] 12 matching backend (plan D17)                    - [x] 13 notifications backend (plan D19 backend)
 - [ ] 14 analytics endpoint + redeploy API (plan D20 backend)  - [x] 15 backend hardening (plan D22)
-- [ ] 16 observability + performance (plan D25)         - [ ] 17 demo seed + concurrency script (plan D26)
+- [x] 16 observability + performance (plan D25)         - [x] 17 demo seed + concurrency script (plan D26)
 - [ ] 18 live regression         - [ ] 19 backend fixes + reviews   - [ ] 20 API docs + deployment notes
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Day 26 (Demo data and notes — 2026-11-17)
+- **Files created**: `server/prisma/seed-demo.js`, `scripts/concurrency-demo.mjs`, `docs/DEMO_SCRIPT.md`, and `docs/performance-notes.md`.
+- **Files changed**: `server/package.json` adds `db:seed:demo`.
+- **Demo seed**: Idempotently replaces six `@demo.skillbridge.test` accounts, five projects across OPEN, IN_PROGRESS, DRAFT, and COMPLETED, four applications, two differently-stated exchanges, and their notifications. Requires a valid `DEMO_PASSWORD` and refuses production unless `ALLOW_DEMO_SEED_IN_PRODUCTION=yes`.
+- **Manual check**: Ran the demo seed twice against local development PostgreSQL; both runs printed only the six demo emails. Verified six users, five projects, and exactly two pending applications on the 2-seat last-seat project. The production guard refused an unapproved production run.
+- **Concurrency check**: Ran `scripts/concurrency-demo.mjs` against a local API; responses were 200 and 409, with one member added. Reseeded afterward to restore the two pending applications.
+- **Performance check**: On local development PostgreSQL only, loaded 500 temporary users, 200 projects, 2,000 user skills, 500 learning goals, and 600 applications. Recorded actual `EXPLAIN (ANALYZE, BUFFERS)` plans and view results in `docs/performance-notes.md`, verified temporary users and projects were deleted, and deleted the loader script.
+- **README scope**: A root `README.md` exists, but it was not edited because the safety path limit excludes root files. Demo instructions and both script commands are documented in `docs/DEMO_SCRIPT.md`.
+- **Verification**: `npm run verify` passed: 175 server tests, 77 client tests, lint, and client build.
+- **Tests added**: None; the seed and concurrency scripts were exercised directly against the local development database and local API.
+
 ### Day 22 (Backend hardening — 2026-11-17)
 - **Files created**: `server/src/security.test.js`, `server/src/middleware/rateLimiters.test.js`, `server/src/config/logger.test.js`, `server/src/utils/sessionCleanup.js`, and `sessionCleanup.test.js`; `docs/security-notes.md` records the audit and security checks.
 - **Files changed**: `server/src/middleware/rateLimiters.js` exposes a configurable test factory while preserving `authLimiter`; `server/src/server.js` removes expired sessions at startup and every six hours; `server/src/config/logger.js` exports the options used by the configured logger; `server/src/middleware/middleware.test.js` checks generic error responses have no stack trace.
