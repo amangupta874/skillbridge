@@ -8,13 +8,22 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [x] 6 deploy database + API (plan D6; done 2026-11-14) - [ ] 7 review (plan D7)
 - [x] 8 projects backend (plan D8)                      - [x] 9 applications backend (plan D11)
 - [x] 10 decide + row lock + concurrency test (plan D12)- [x] 11 exchanges backend (plan D15)
-- [x] 12 matching backend (plan D17)                    - [ ] 13 notifications backend (plan D19 backend)
+- [x] 12 matching backend (plan D17)                    - [x] 13 notifications backend (plan D19 backend)
 - [ ] 14 analytics endpoint + redeploy API (plan D20 backend)  - [ ] 15 backend hardening (plan D22)
 - [ ] 16 observability + performance (plan D25)         - [ ] 17 demo seed + concurrency script (plan D26)
 - [ ] 18 live regression         - [ ] 19 backend fixes + reviews   - [ ] 20 API docs + deployment notes
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Day 19 (Notifications backend — 2026-11-17)
+- **Files created**: `server/src/modules/notifications/notifications.routes.js`, `notifications.schema.js`, `notifications.controller.js`, `notifications.service.js`, and `notifications.test.js`.
+- **Files changed**: `server/src/routes.js` mounts the notifications routes.
+- **Endpoints**: paginated caller-only listing with unread filtering and server-rendered messages and links, unread count, mark one read, and mark all read. Related names and titles are loaded in bulk with the notification list.
+- **Tests added**: 8 covering application and exchange message/link rendering, caller privacy, unread filtering and counts, read and read-all, wrong-user 404, newest-first pagination, and authentication.
+- **Manual check**: Notification HTTP flows were exercised through Supertest using application and exchange endpoints to create the notifications.
+- **Verification**: `npm run verify` passed: 136 server tests, 74 client tests, lint, and client build.
+- **Deferred**: Nothing for this task.
+
 ### Day 17 (Matching backend — 2026-11-17)
 - **Files created**: `server/src/modules/matching/matching.routes.js`, `matching.schema.js`, `matching.controller.js`, `matching.service.js`, and `matching.test.js`.
 - **Files changed**: `server/src/modules/projects/projects.routes.js` mounts the matching route before project detail handling.

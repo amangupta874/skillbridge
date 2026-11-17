@@ -7,6 +7,7 @@ import { usersRoutes } from './modules/users/users.routes.js';
 import { projectsRoutes } from './modules/projects/projects.routes.js';
 import { applicationsRoutes } from './modules/applications/applications.routes.js';
 import { exchangesRoutes } from './modules/exchanges/exchanges.routes.js';
+import { notificationsRoutes } from './modules/notifications/notifications.routes.js';
 
 export const apiRouter = express.Router();
 
@@ -20,5 +21,6 @@ apiRouter.use('/lookups', lookupsRoutes);
 apiRouter.use('/skills', skillsRoutes);
 apiRouter.use(applicationsRoutes);
 apiRouter.use('/exchanges', exchangesRoutes);
+apiRouter.use('/notifications', notificationsRoutes);
 apiRouter.use('/users', usersRoutes);
 apiRouter.use('/projects', projectsRoutes);
