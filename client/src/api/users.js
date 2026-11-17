@@ -7,7 +7,7 @@ export async function getUserById(id) {
 
 export async function getUsers(params = {}) {
   const response = await api.get('/users', { params });
-  return response.data;
+  return { items: response.data.data, meta: response.data.meta };
 }
 
 export async function updateProfile(data) {
