@@ -10,11 +10,14 @@ import Spinner from '../components/Spinner.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { formatDate } from '../utils/date.js';
+import { useState } from 'react';
+import RequestExchangeDialog from '../components/RequestExchangeDialog.jsx';
 
 export default function PublicProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
+  const [exchangeDialogOpen, setExchangeDialogOpen] = useState(false);
 
   const {
     data: profileUser,
@@ -64,7 +67,7 @@ export default function PublicProfilePage() {
     );
   }
 
-  const isOwnProfile = currentUser && Number(currentUser.id) === Number(profileUser.id);
+  const isOwnProfile = currentUser && String(currentUser.id) === String(profileUser.id);
 
   // Compute initials for avatar
   const initials = profileUser.fullName
@@ -118,11 +121,9 @@ export default function PublicProfilePage() {
                 </Button>
               </Link>
             ) : (
-              <Link to={`/exchanges?recipientId=${profileUser.id}`}>
-                <Button variant="primary" size="md">
-                  Request skill exchange
-                </Button>
-              </Link>
+              <Button variant="primary" size="md" onClick={() => setExchangeDialogOpen(true)}>
+                Request skill exchange
+              </Button>
             )}
           </div>
         </div>
@@ -243,6 +244,7 @@ export default function PublicProfilePage() {
           </Card>
         </div>
       </div>
+      {!isOwnProfile && <RequestExchangeDialog open={exchangeDialogOpen} onClose={() => setExchangeDialogOpen(false)} currentUserId={currentUser?.id} recipient={profileUser} />}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PublicProfilePage from './PublicProfilePage.jsx';
+import { ToastProvider } from '../components/Toast.jsx';
 import * as UsersApi from '../api/users.js';
 import * as AuthContextModule from '../context/AuthContext.jsx';
 import { ApiError } from '../api/client.js';
@@ -52,13 +53,15 @@ function renderWithProviders(ui, { route = '/users/1' } = {}) {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[route]}>
-        <Routes>
-          <Route path="/users/:id" element={ui} />
-          <Route path="/people" element={<div>People Directory</div>} />
-          <Route path="/profile/edit" element={<div>Edit Profile Page</div>} />
-        </Routes>
-      </MemoryRouter>
+      <ToastProvider>
+        <MemoryRouter initialEntries={[route]}>
+          <Routes>
+            <Route path="/users/:id" element={ui} />
+            <Route path="/people" element={<div>People Directory</div>} />
+            <Route path="/profile/edit" element={<div>Edit Profile Page</div>} />
+          </Routes>
+        </MemoryRouter>
+      </ToastProvider>
     </QueryClientProvider>,
   );
 }
@@ -119,12 +122,13 @@ describe('PublicProfilePage', () => {
   });
 
   it('shows "Edit Profile" and hides exchange button when viewing own profile', async () => {
+    const ownProfile = { ...mockUser, id: 'alice-user-id' };
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
-      user: { id: 1, fullName: 'Alice Chen' }, // same user
+      user: { id: 'alice-user-id', fullName: 'Alice Chen' },
     });
-    vi.spyOn(UsersApi, 'getUserById').mockResolvedValue(mockUser);
+    vi.spyOn(UsersApi, 'getUserById').mockResolvedValue(ownProfile);
 
-    renderWithProviders(<PublicProfilePage />, { route: '/users/1' });
+    renderWithProviders(<PublicProfilePage />, { route: '/users/alice-user-id' });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /edit profile/i })).toBeInTheDocument();
