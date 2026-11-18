@@ -151,7 +151,8 @@ export default function ProjectDetailPage() {
           </section>
         )}
         {project.myRole === 'OWNER' ? (
-          <section className="mt-6 border-t border-slate-100 pt-5">
+          <section className="mt-6 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-5">
+            <Link to={`/projects/${project.id}/matches`} className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-xs hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Find teammates</Link>
             <Link to={`/projects/${project.id}/applications`}><Button variant="secondary">View applications</Button></Link>
           </section>
         ) : (

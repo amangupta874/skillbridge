@@ -15,6 +15,7 @@ import ProjectsPage from './pages/ProjectsPage.jsx';
 import ProjectDetailPage from './pages/ProjectDetailPage.jsx';
 import ProjectFormPage from './pages/ProjectFormPage.jsx';
 import MyProjectsPage from './pages/MyProjectsPage.jsx';
+import ProjectMatchesPage from './pages/ProjectMatchesPage.jsx';
 import ProjectApplicationsPage from './pages/ProjectApplicationsPage.jsx';
 import ApplicationsPage from './pages/ApplicationsPage.jsx';
 import PeoplePage from './pages/PeoplePage.jsx';
@@ -61,6 +62,7 @@ export default function App({ client }) {
                 <Route path="/projects/new" element={<ProjectFormPage />} />
                 <Route path="/projects/:id/edit" element={<ProjectFormPage edit />} />
                 <Route path="/projects/:id/applications" element={<ProjectApplicationsPage />} />
+                <Route path="/projects/:id/matches" element={<ProjectMatchesPage />} />
                 <Route path="/projects/:id" element={<ProjectDetailPage />} />
                 <Route path="/my-projects" element={<MyProjectsPage />} />
                 <Route path="/applications" element={<ApplicationsPage />} />
