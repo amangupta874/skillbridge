@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import Button from '../components/Button.jsx';
+import NotificationBell from '../components/NotificationBell.jsx';
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
@@ -20,7 +21,6 @@ export default function AppLayout() {
     { to: '/applications', label: 'My applications' },
     { to: '/exchanges', label: 'Exchanges' },
     { to: '/people', label: 'People' },
-    { to: '/notifications', label: 'Notifications' },
   ];
 
   const profileUrl = user?.id ? `/users/${user.id}` : '/profile/edit';
@@ -33,7 +33,7 @@ export default function AppLayout() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-4">
             {/* Logo */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 lg:gap-6">
               <Link to="/" className="text-xl font-bold text-indigo-600 tracking-tight">
                 SkillBridge
               </Link>
@@ -46,7 +46,7 @@ export default function AppLayout() {
                     to={link.to}
                     end={link.to === '/'}
                     className={({ isActive }) =>
-                      `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      `px-2 py-2 lg:px-3 rounded-lg text-sm font-medium transition-colors ${
                         isActive
                           ? 'bg-indigo-50 text-indigo-700 font-semibold'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -72,7 +72,7 @@ export default function AppLayout() {
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700 border border-indigo-200">
                       {userInitial}
                     </span>
-                    <span className="max-w-[140px] truncate">
+                    <span className="hidden max-w-[140px] truncate lg:inline">
                       {user.fullName || user.email}
                     </span>
                   </Link>
@@ -83,14 +83,14 @@ export default function AppLayout() {
               )}
             </div>
 
-            {/* Mobile Hamburger Button */}
-            <div className="flex md:hidden items-center">
+            <div className="flex items-center gap-2 md:gap-0">
+              <NotificationBell onClick={() => setMobileMenuOpen(false)} />
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
                 aria-expanded={mobileMenuOpen}
                 aria-label="Toggle navigation menu"
-                className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-indigo-600"
+                className="md:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-indigo-600"
               >
                 <span className="sr-only">Open main menu</span>
                 {mobileMenuOpen ? (

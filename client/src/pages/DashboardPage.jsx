@@ -1,10 +1,15 @@
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { getNotifications } from '../api/notifications.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import Button from '../components/Button.jsx';
 import Card from '../components/Card.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
+import NotificationList from '../components/NotificationList.jsx';
+import Spinner from '../components/Spinner.jsx';
 
-function DashboardSection({ title, description, to, linkLabel, actionLabel, emptyTitle, emptyDescription }) {
+function DashboardSection({ title, description, to, linkLabel, actionLabel, emptyTitle, emptyDescription, children }) {
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
@@ -17,19 +22,29 @@ function DashboardSection({ title, description, to, linkLabel, actionLabel, empt
         </Link>
       </div>
       <Card>
-        <EmptyState title={emptyTitle} description={emptyDescription} />
-        <div className="mt-4 text-center">
-          <Link to={to} className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
-            {actionLabel}
-          </Link>
-        </div>
+        {children ?? (
+          <>
+            <EmptyState title={emptyTitle} description={emptyDescription} />
+            <div className="mt-4 text-center">
+              <Link to={to} className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                {actionLabel}
+              </Link>
+            </div>
+          </>
+        )}
       </Card>
     </section>
   );
 }
 
+const notificationFilters = { page: 1, limit: 5 };
+
 export default function DashboardPage() {
   const { user } = useAuth();
+  const notificationsQuery = useQuery({
+    queryKey: ['notifications', notificationFilters],
+    queryFn: () => getNotifications(notificationFilters),
+  });
 
   return (
     <div className="space-y-8">
@@ -83,14 +98,19 @@ export default function DashboardPage() {
             emptyDescription="Your skill exchange requests will appear here."
           />
           <DashboardSection
-            title="Recent Notifications"
+            title="Recent notifications"
             description="Alerts and project updates"
             to="/notifications"
             linkLabel="View all notifications"
-            actionLabel="View notifications"
-            emptyTitle="No notifications yet"
-            emptyDescription="Updates about your activity will appear here."
-          />
+          >
+            {notificationsQuery.isLoading && <Spinner />}
+            {notificationsQuery.error && <ErrorBanner error={notificationsQuery.error} onRetry={() => notificationsQuery.refetch()} />}
+            {notificationsQuery.isSuccess && (
+              notificationsQuery.data.items.length === 0
+                ? <EmptyState title="You have no notifications yet" />
+                : <NotificationList notifications={notificationsQuery.data.items} />
+            )}
+          </DashboardSection>
 
           <Card className="bg-gradient-to-br from-indigo-50/60 to-white p-5">
             <h3 className="mb-2 text-sm font-bold text-slate-900">Quick Shortcuts</h3>
