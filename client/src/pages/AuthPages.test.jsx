@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from './LoginPage.jsx';
 import RegisterPage from './RegisterPage.jsx';
@@ -9,6 +10,10 @@ import { ApiError } from '../api/client.js';
 
 vi.mock('../context/AuthContext.jsx', () => ({
   useAuth: vi.fn(),
+}));
+
+vi.mock('../api/notifications.js', () => ({
+  getNotifications: vi.fn().mockResolvedValue({ items: [], meta: { page: 1, limit: 5, total: 0, totalPages: 1 } }),
 }));
 
 describe('Auth Pages', () => {
@@ -233,18 +238,21 @@ describe('Auth Pages', () => {
   });
 
   describe('DashboardPage', () => {
-    it('displays the user name prominently', () => {
+    it('displays the user name prominently', async () => {
       vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
         user: { id: 1, fullName: 'Alice Student', email: 'alice@college.edu' },
       });
 
       render(
-        <MemoryRouter>
-          <DashboardPage />
-        </MemoryRouter>,
+        <QueryClientProvider client={new QueryClient()}>
+          <MemoryRouter>
+            <DashboardPage />
+          </MemoryRouter>
+        </QueryClientProvider>,
       );
 
       expect(screen.getByTestId('dashboard-greeting')).toHaveTextContent('Welcome back, Alice Student!');
+      expect(await screen.findByText('You have no notifications yet')).toBeInTheDocument();
     });
   });
 });

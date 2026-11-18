@@ -20,7 +20,8 @@ import ProjectApplicationsPage from './pages/ProjectApplicationsPage.jsx';
 import ApplicationsPage from './pages/ApplicationsPage.jsx';
 import PeoplePage from './pages/PeoplePage.jsx';
 import ExchangesPage from './pages/ExchangesPage.jsx';
-import { PlaceholderPage, NotFoundPage } from './pages/PlaceholderPage.jsx';
+import NotificationsPage from './pages/NotificationsPage.jsx';
+import { NotFoundPage } from './pages/PlaceholderPage.jsx';
 
 export function createQueryClient() {
   return new QueryClient({
@@ -68,10 +69,7 @@ export default function App({ client }) {
                 <Route path="/applications" element={<ApplicationsPage />} />
                 <Route path="/exchanges" element={<ExchangesPage />} />
                 <Route path="/people" element={<PeoplePage />} />
-                <Route
-                  path="/notifications"
-                  element={<PlaceholderPage title="Notifications" description="View your activity and alerts." />}
-                />
+                <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/profile/edit" element={<EditProfilePage />} />
               </Route>
 
