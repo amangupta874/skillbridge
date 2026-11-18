@@ -71,6 +71,7 @@ export default function ProjectApplicationsPage() {
       <header>
         <Link to={`/projects/${id}`} className="text-sm font-medium text-indigo-700 hover:text-indigo-900">← Back to project</Link>
         <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">Applications for {project.title}</h1>
+        <Link to={`/projects/${id}/matches`} className="mt-2 inline-block text-sm font-medium text-indigo-700 hover:underline">Find teammates</Link>
         <p className="mt-2 text-sm text-slate-600">{project.seatsLeft} {project.seatsLeft === 1 ? 'seat' : 'seats'} left · {project.seatsTaken} of {project.maxTeamSize} filled</p>
       </header>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filter applications by status">
