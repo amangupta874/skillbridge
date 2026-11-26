@@ -16,17 +16,18 @@ import NotificationList from '../components/NotificationList.jsx';
 import ProjectCard from '../components/ProjectCard.jsx';
 import { formatLabel } from '../utils/labels.js';
 import Spinner from '../components/Spinner.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 function DashboardSection({ title, description, to, linkLabel, children }) {
   const titleId = useId();
   return (
     <section aria-labelledby={titleId}>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 id={titleId} className="text-lg font-bold text-slate-900">{title}</h2>
-          {description && <p className="text-xs text-slate-500">{description}</p>}
+          {description && <p className="text-xs text-slate-700">{description}</p>}
         </div>
-        <Link to={to} className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+        <Link to={to} className="text-sm font-medium text-indigo-700 hover:text-indigo-800">
           {linkLabel}
         </Link>
       </div>
@@ -44,7 +45,7 @@ function DashboardResults({ query, emptyTitle, emptyTo, emptyLink, children }) {
   if (!query.data?.items.length) {
     return (
       <div className="space-y-4 text-center">
-        <EmptyState title={emptyTitle} />
+        <EmptyState heading="h3" title={emptyTitle} />
         {emptyTo && <Link to={emptyTo} className="text-sm font-medium text-indigo-700 underline">{emptyLink}</Link>}
       </div>
     );
@@ -96,6 +97,7 @@ const ownedFilters = { mine: 'owned', limit: 3 };
 const notificationFilters = { page: 1, limit: 5 };
 
 export default function DashboardPage() {
+  usePageTitle('Dashboard');
   const { user } = useAuth();
   const applicationsQuery = useQuery({
     queryKey: ['applications', 'mine', applicationFilters],
@@ -120,15 +122,15 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl" data-testid="dashboard-greeting">
-              Welcome back, <span className="text-indigo-600">{user?.fullName || user?.email || 'Student'}</span>!
+              Welcome back, <span className="text-indigo-700">{user?.fullName || user?.email || 'Student'}</span>!
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
+            <p className="mt-2 max-w-2xl text-sm text-slate-700 sm:text-base">
               Find a project, meet teammates, or share a skill with another student.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <Link to="/projects"><Button variant="primary" size="md">Find Projects</Button></Link>
-            <Link to="/people"><Button variant="secondary" size="md">Find People</Button></Link>
+          <div className="flex shrink-0 flex-wrap items-center gap-3">
+            <Button to="/projects" variant="primary" size="md">Find Projects</Button>
+            <Button to="/people" variant="secondary" size="md">Find People</Button>
           </div>
         </div>
       </div>
@@ -214,19 +216,19 @@ export default function DashboardPage() {
             {notificationsQuery.error && <ErrorBanner error={notificationsQuery.error} onRetry={() => notificationsQuery.refetch()} />}
             {notificationsQuery.isSuccess && (
               notificationsQuery.data.items.length === 0
-                ? <EmptyState title="You have no notifications yet" />
+                ? <EmptyState heading="h3" title="You have no notifications yet" />
                 : <NotificationList notifications={notificationsQuery.data.items} />
             )}
           </DashboardSection>
 
           <Card className="bg-gradient-to-br from-indigo-50/60 to-white p-5">
-            <h3 className="mb-2 text-sm font-bold text-slate-900">Quick Shortcuts</h3>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <Link to="/projects" className="rounded-lg border border-slate-200 bg-white p-2.5 text-center font-medium text-slate-700 hover:border-indigo-300 hover:text-indigo-600">Browse Projects</Link>
-              <Link to="/people" className="rounded-lg border border-slate-200 bg-white p-2.5 text-center font-medium text-slate-700 hover:border-indigo-300 hover:text-indigo-600">Find Peers</Link>
-              <Link to="/exchanges" className="rounded-lg border border-slate-200 bg-white p-2.5 text-center font-medium text-slate-700 hover:border-indigo-300 hover:text-indigo-600">My Exchanges</Link>
-              <Link to="/profile/edit" className="rounded-lg border border-slate-200 bg-white p-2.5 text-center font-medium text-slate-700 hover:border-indigo-300 hover:text-indigo-600">Edit Profile</Link>
-            </div>
+            <h2 className="mb-2 text-sm font-bold text-slate-900">Quick Shortcuts</h2>
+            <ul className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
+              <li className="grid"><Link to="/projects" className="rounded-lg border border-slate-200 bg-white p-2.5 text-center font-medium text-slate-700 hover:border-indigo-300 hover:text-indigo-700">Browse Projects</Link></li>
+              <li className="grid"><Link to="/people" className="rounded-lg border border-slate-200 bg-white p-2.5 text-center font-medium text-slate-700 hover:border-indigo-300 hover:text-indigo-700">Find Peers</Link></li>
+              <li className="grid"><Link to="/exchanges" className="rounded-lg border border-slate-200 bg-white p-2.5 text-center font-medium text-slate-700 hover:border-indigo-300 hover:text-indigo-700">My Exchanges</Link></li>
+              <li className="grid"><Link to="/profile/edit" className="rounded-lg border border-slate-200 bg-white p-2.5 text-center font-medium text-slate-700 hover:border-indigo-300 hover:text-indigo-700">Edit Profile</Link></li>
+            </ul>
           </Card>
         </div>
       </div>

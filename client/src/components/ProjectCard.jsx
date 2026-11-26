@@ -16,7 +16,7 @@ export default function ProjectCard({ project, heading: Heading = 'h2' }) {
           {project.title}
         </Link>
       </Heading>
-      <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{project.summary}</p>
+      <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-700">{project.summary}</p>
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <Badge variant={project.difficulty}>{formatLabel(project.difficulty)}</Badge>
         <span className="text-sm font-medium text-slate-700">
@@ -24,14 +24,14 @@ export default function ProjectCard({ project, heading: Heading = 'h2' }) {
         </span>
       </div>
       <div className="mt-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Required skills</p>
-        <div className="flex flex-wrap gap-2">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-700">Required skills</p>
+        <ul role="list" className="flex flex-wrap gap-2">
           {project.skills.map((skill) => (
-            <SkillBadge key={skill.id} skill={skill} level={skill.minLevel} />
+            <li key={skill.id}><SkillBadge skill={skill} level={skill.minLevel} /></li>
           ))}
-        </div>
+        </ul>
       </div>
-      <p className="mt-auto pt-5 text-sm text-slate-500">Owner: <span className="font-medium text-slate-700">{project.owner.fullName}</span></p>
+      <p className="mt-auto pt-5 text-sm text-slate-700">Owner: <span className="font-medium text-slate-700">{project.owner.fullName}</span></p>
     </Card>
   );
 }

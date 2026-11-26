@@ -8,8 +8,10 @@ import { fieldErrorsFromApiError } from '../api/client.js';
 import Input from '../components/Input.jsx';
 import Button from '../components/Button.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 export default function LoginPage() {
+  usePageTitle('Sign in');
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,10 +61,11 @@ export default function LoginPage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Sign in to your account</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Sign in to your account</h1>
+        <p className="mt-2 text-sm text-slate-700">Find student projects and teammates, or trade skills with another student.</p>
+        <p className="mt-1 text-sm text-slate-700">
           Or{' '}
-          <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link to="/register" className="font-medium text-indigo-700 underline hover:text-indigo-900">
             create a new student account
           </Link>
         </p>
@@ -74,7 +77,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      {serverError && <ErrorBanner error={serverError} />}
+      {serverError && <ErrorBanner error={serverError} onRetry={isSubmitting ? undefined : handleSubmit(onSubmit)} />}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <Input

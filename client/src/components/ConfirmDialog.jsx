@@ -1,4 +1,6 @@
 import Button from './Button.jsx';
+import ErrorBanner from './ErrorBanner.jsx';
+import Modal from './Modal.jsx';
 
 export default function ConfirmDialog({
   open,
@@ -6,22 +8,18 @@ export default function ConfirmDialog({
   message,
   confirmLabel = 'Confirm',
   loading = false,
+  error,
   danger = false,
   onConfirm,
   onCancel,
 }) {
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4" onMouseDown={(event) => event.target === event.currentTarget && !loading && onCancel()}>
-      <div role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message" className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-        <h2 id="confirm-title" className="text-lg font-semibold text-slate-900">{title}</h2>
-        <p id="confirm-message" className="mt-2 text-sm leading-6 text-slate-600">{message}</p>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button variant="secondary" disabled={loading} onClick={onCancel}>Cancel</Button>
-          <Button variant={danger ? 'danger' : 'primary'} loading={loading} onClick={onConfirm}>{confirmLabel}</Button>
-        </div>
+    <Modal open={open} role="alertdialog" title={title} description={message} onClose={onCancel} closeDisabled={loading}>
+      <ErrorBanner error={error} className="mb-4" />
+      <div className="flex flex-wrap justify-end gap-3">
+        <Button variant="secondary" disabled={loading} onClick={onCancel}>Cancel</Button>
+        <Button variant={danger ? 'danger' : 'primary'} loading={loading} onClick={onConfirm}>{error ? 'Retry' : confirmLabel}</Button>
       </div>
-    </div>
+    </Modal>
   );
 }

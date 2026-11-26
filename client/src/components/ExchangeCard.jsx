@@ -3,24 +3,34 @@ import { Link } from 'react-router-dom';
 import Card from './Card.jsx';
 import Badge from './Badge.jsx';
 import Button from './Button.jsx';
+import ErrorBanner from './ErrorBanner.jsx';
 import ConfirmDialog from './ConfirmDialog.jsx';
 import { formatDate } from '../utils/date.js';
 
 const ACTIONS = {
-  ACCEPTED: { label: 'Accept', confirm: false },
-  REJECTED: { label: 'Reject', confirm: true },
-  CANCELLED: { label: 'Cancel', confirm: true },
-  COMPLETED: { label: 'Mark completed', confirm: false },
+  ACCEPTED: { label: 'Accept' },
+  REJECTED: { label: 'Reject', title: 'Reject this request?', message: 'The sender will be told you declined this request.', danger: true },
+  CANCELLED: { label: 'Cancel', title: 'Cancel this exchange?', message: 'This exchange request will be cancelled.', danger: true },
+  COMPLETED: { label: 'Mark completed', title: 'Mark this exchange completed?', message: 'The other student will be notified.' },
 };
 
-export default function ExchangeCard({ exchange, currentUserId, onStatusChange, saving = false }) {
+export default function ExchangeCard({ exchange, currentUserId, onStatusChange, saving = false, error, failedStatus, onCancelError }) {
   const [pendingStatus, setPendingStatus] = useState('');
   const person = String(exchange.sender.id) === String(currentUserId) ? exchange.recipient : exchange.sender;
   const action = ACTIONS[pendingStatus];
 
+  async function changeStatus(status) {
+    try {
+      await onStatusChange(exchange.id, status);
+      setPendingStatus('');
+    } catch {
+      // Keep the action available for retry.
+    }
+  }
+
   function chooseStatus(status) {
-    if (ACTIONS[status].confirm) setPendingStatus(status);
-    else onStatusChange(exchange.id, status);
+    if (ACTIONS[status].title) setPendingStatus(status);
+    else changeStatus(status);
   }
 
   return (
@@ -33,11 +43,14 @@ export default function ExchangeCard({ exchange, currentUserId, onStatusChange, 
         <Badge variant={exchange.status}>{exchange.status.charAt(0) + exchange.status.slice(1).toLowerCase()}</Badge>
       </div>
       <p className="whitespace-pre-line text-sm leading-6 text-slate-700">{exchange.message}</p>
-      <p className="text-xs text-slate-500">{formatDate(exchange.createdAt)}</p>
+      <p className="text-xs text-slate-700">{formatDate(exchange.createdAt)}</p>
+      {!pendingStatus && failedStatus === 'ACCEPTED' && (
+        <ErrorBanner error={error} onRetry={exchange.allowedTransitions?.includes(failedStatus) ? () => changeStatus(failedStatus) : undefined} />
+      )}
       {exchange.allowedTransitions?.length > 0 && (
         <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
           {exchange.allowedTransitions.filter((status) => ACTIONS[status]).map((status) => (
-            <Button key={status} size="sm" variant={status === 'REJECTED' || status === 'CANCELLED' ? 'danger' : 'secondary'} disabled={saving} loading={saving && pendingStatus === status} onClick={() => chooseStatus(status)}>
+            <Button key={status} size="sm" variant={status === 'REJECTED' || status === 'CANCELLED' ? 'danger' : 'secondary'} disabled={saving} loading={saving && pendingStatus === status} aria-haspopup={ACTIONS[status].title ? 'dialog' : undefined} onClick={() => chooseStatus(status)}>
               {ACTIONS[status].label}
             </Button>
           ))}
@@ -45,13 +58,14 @@ export default function ExchangeCard({ exchange, currentUserId, onStatusChange, 
       )}
       <ConfirmDialog
         open={Boolean(pendingStatus)}
-        title={pendingStatus === 'REJECTED' ? 'Reject this request?' : 'Cancel this exchange?'}
-        message={pendingStatus === 'REJECTED' ? 'The sender will be told you declined this request.' : 'This exchange request will be cancelled.'}
+        title={action?.title}
+        message={action?.message}
         confirmLabel={action?.label ?? 'Confirm'}
-        danger
+        danger={action?.danger}
+        error={pendingStatus === failedStatus ? error : null}
         loading={saving}
-        onCancel={() => setPendingStatus('')}
-        onConfirm={() => onStatusChange(exchange.id, pendingStatus).then(() => setPendingStatus('')).catch(() => {})}
+        onCancel={() => { setPendingStatus(''); onCancelError?.(); }}
+        onConfirm={() => changeStatus(pendingStatus)}
       />
     </Card>
   );

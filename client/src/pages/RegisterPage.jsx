@@ -8,8 +8,10 @@ import { fieldErrorsFromApiError } from '../api/client.js';
 import Input from '../components/Input.jsx';
 import Button from '../components/Button.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 export default function RegisterPage() {
+  usePageTitle('Register');
   const { user, register: authRegister } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,16 +59,17 @@ export default function RegisterPage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Create an account</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Create an account</h1>
+        <p className="mt-2 text-sm text-slate-700">Find student projects and teammates, or trade skills with another student.</p>
+        <p className="mt-1 text-sm text-slate-700">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link to="/login" className="font-medium text-indigo-700 underline hover:text-indigo-900">
             Sign in
           </Link>
         </p>
       </div>
 
-      {serverError && <ErrorBanner error={serverError} />}
+      {serverError && <ErrorBanner error={serverError} onRetry={isSubmitting ? undefined : handleSubmit(onSubmit)} />}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <Input

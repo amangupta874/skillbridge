@@ -14,6 +14,8 @@ import SkillBadge from '../components/SkillBadge.jsx';
 import Spinner from '../components/Spinner.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { formatLabel } from '../utils/labels.js';
+import PageState from '../components/PageState.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const statusOptions = [
   ['all', 'All'],
@@ -24,6 +26,7 @@ const statusOptions = [
 ];
 
 export default function ProjectApplicationsPage() {
+  usePageTitle('Project applications');
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -50,18 +53,17 @@ export default function ProjectApplicationsPage() {
       ]);
     },
     onError: (error) => {
-      setDecision(null);
       toast.error(error.message);
       queryClient.invalidateQueries({ queryKey: ['applications', id] });
       queryClient.invalidateQueries({ queryKey: ['project', id] });
     },
   });
 
-  if (projectQuery.isLoading) return <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-500">Loading project...</p></div>;
-  if (projectQuery.error?.status === 404) return <EmptyState title="Project not found" description="This project is not available." actionLabel="Browse projects" onAction={() => navigate('/projects')} />;
-  if (projectQuery.error) return <ErrorBanner error={projectQuery.error} onRetry={() => projectQuery.refetch()} />;
+  if (projectQuery.isLoading) return <PageState title="Project applications"><Spinner size="lg" /></PageState>;
+  if (projectQuery.error?.status === 404) return <EmptyState heading="h1" title="Project not found" description="This project is not available." actionLabel="Browse projects" onAction={() => navigate('/projects')} />;
+  if (projectQuery.error) return <PageState title="Project applications"><ErrorBanner error={projectQuery.error} onRetry={() => projectQuery.refetch()} /></PageState>;
   if (projectQuery.data?.myRole !== 'OWNER') {
-    return <EmptyState title="You are not allowed to view these applications" actionLabel="Back to project" onAction={() => navigate(`/projects/${id}`)} />;
+    return <EmptyState heading="h1" title="You are not allowed to view these applications" actionLabel="Back to project" onAction={() => navigate(`/projects/${id}`)} />;
   }
 
   const project = projectQuery.data;
@@ -69,10 +71,10 @@ export default function ProjectApplicationsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <Link to={`/projects/${id}`} className="text-sm font-medium text-indigo-700 hover:text-indigo-900">← Back to project</Link>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">Applications for {project.title}</h1>
+        <Link to={`/projects/${id}`} className="text-sm font-medium text-indigo-700 hover:text-indigo-900"><span aria-hidden="true">← </span>Back to project</Link>
+        <h1 tabIndex={-1} className="mt-3 text-2xl font-bold tracking-tight text-slate-900">Applications for {project.title}</h1>
         <Link to={`/projects/${id}/matches`} className="mt-2 inline-block text-sm font-medium text-indigo-700 hover:underline">Find teammates</Link>
-        <p className="mt-2 text-sm text-slate-600">{project.seatsLeft} {project.seatsLeft === 1 ? 'seat' : 'seats'} left · {project.seatsTaken} of {project.maxTeamSize} filled</p>
+        <p className="mt-2 text-sm text-slate-700">{project.seatsLeft} {project.seatsLeft === 1 ? 'seat' : 'seats'} left · {project.seatsTaken} of {project.maxTeamSize} filled</p>
       </header>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filter applications by status">
         {statusOptions.map(([value, label]) => (
@@ -80,39 +82,39 @@ export default function ProjectApplicationsPage() {
         ))}
       </div>
       {applicationsQuery.isLoading ? (
-        <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-500">Loading applications...</p></div>
+        <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-700">Loading applications...</p></div>
       ) : applicationsQuery.error ? (
         <ErrorBanner error={applicationsQuery.error} onRetry={() => applicationsQuery.refetch()} />
       ) : applicationsQuery.data.items.length === 0 ? (
         <EmptyState title="No applications found" description={status === 'all' ? 'No one has applied to this project yet.' : `There are no ${status.toLowerCase()} applications.`} />
       ) : (
         <>
-          <div className="space-y-4">
+          <ul role="list" className="space-y-4">
             {applicationsQuery.data.items.map((application) => (
-              <Card key={application.id}>
+              <Card as="li" key={application.id}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h2 className="text-lg font-semibold text-slate-900">{application.applicant.fullName}</h2>
-                    {application.applicant.college && <p className="mt-0.5 text-sm text-slate-500">{application.applicant.college.name}</p>}
+                    {application.applicant.college && <p className="mt-0.5 text-sm text-slate-700">{application.applicant.college.name}</p>}
                   </div>
                   <Badge variant={application.status}>{formatLabel(application.status)}</Badge>
                 </div>
                 {application.applicant.topSkills.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {application.applicant.topSkills.map(({ skill, level }) => <SkillBadge key={skill.id} skill={skill} level={formatLabel(level)} />)}
-                  </div>
+                  <ul role="list" className="mt-4 flex flex-wrap gap-2">
+                    {application.applicant.topSkills.map(({ skill, level }) => <li key={skill.id}><SkillBadge skill={skill} level={formatLabel(level)} /></li>)}
+                  </ul>
                 )}
                 <p className="mt-4 whitespace-pre-line text-sm leading-6 text-slate-700">{application.message}</p>
-                <p className="mt-3 text-xs text-slate-500">Applied {new Date(application.createdAt).toLocaleDateString()}</p>
+                <p className="mt-3 text-xs text-slate-700">Applied {new Date(application.createdAt).toLocaleDateString()}</p>
                 {application.allowedTransitions.some((nextStatus) => ['ACCEPTED', 'REJECTED'].includes(nextStatus)) && (
                   <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-                    {application.allowedTransitions.includes('ACCEPTED') && <Button disabled={decideApplication.isPending} onClick={() => setDecision({ application, status: 'ACCEPTED' })}>Accept</Button>}
-                    {application.allowedTransitions.includes('REJECTED') && <Button variant="danger" disabled={decideApplication.isPending} onClick={() => setDecision({ application, status: 'REJECTED' })}>Reject</Button>}
+                    {application.allowedTransitions.includes('ACCEPTED') && <Button disabled={decideApplication.isPending} aria-haspopup="dialog" onClick={() => { decideApplication.reset(); setDecision({ application, status: 'ACCEPTED' }); }}>Accept</Button>}
+                    {application.allowedTransitions.includes('REJECTED') && <Button variant="danger" disabled={decideApplication.isPending} aria-haspopup="dialog" onClick={() => { decideApplication.reset(); setDecision({ application, status: 'REJECTED' }); }}>Reject</Button>}
                   </div>
                 )}
               </Card>
             ))}
-          </div>
+          </ul>
           <Pagination label="Application pages" page={applicationsQuery.data.meta.page} totalPages={applicationsQuery.data.meta.totalPages} onPageChange={setPage} />
         </>
       )}
@@ -123,7 +125,8 @@ export default function ProjectApplicationsPage() {
         confirmLabel={decision?.status === 'ACCEPTED' ? 'Accept application' : 'Reject application'}
         danger={decision?.status === 'REJECTED'}
         loading={decideApplication.isPending}
-        onCancel={() => setDecision(null)}
+        error={decideApplication.error}
+        onCancel={() => { setDecision(null); decideApplication.reset(); }}
         onConfirm={() => decideApplication.mutate({ applicationId: decision.application.id, nextStatus: decision.status })}
       />
     </div>

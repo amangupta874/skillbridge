@@ -49,7 +49,7 @@ it('marks an unread notification and opens the server link', async () => {
   fireEvent.click(await screen.findByRole('link', { name: /Jordan Kim applied/ }));
 
   expect(await screen.findByRole('heading', { name: 'Project applications' })).toBeInTheDocument();
-  expect(markNotificationRead).toHaveBeenCalledWith(notification.id, expect.anything());
+  expect(markNotificationRead).toHaveBeenCalledWith(notification.id);
   expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['notifications'] });
 });
 

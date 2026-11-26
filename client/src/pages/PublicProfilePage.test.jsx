@@ -80,7 +80,7 @@ describe('PublicProfilePage', () => {
     renderWithProviders(<PublicProfilePage />, { route: '/users/1' });
 
     // Shows loading initially
-    expect(screen.getByTestId('profile-loading')).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
 
     // Renders loaded details
     await waitFor(() => {
@@ -131,7 +131,7 @@ describe('PublicProfilePage', () => {
     renderWithProviders(<PublicProfilePage />, { route: '/users/alice-user-id' });
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /edit profile/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /edit profile/i })).toBeInTheDocument();
     });
 
     expect(screen.queryByRole('button', { name: /request skill exchange/i })).not.toBeInTheDocument();

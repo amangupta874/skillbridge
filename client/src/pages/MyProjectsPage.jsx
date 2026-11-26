@@ -7,8 +7,10 @@ import EmptyState from '../components/EmptyState.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
 import ProjectCard from '../components/ProjectCard.jsx';
 import Spinner from '../components/Spinner.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 export default function MyProjectsPage() {
+  usePageTitle('My projects');
   const [tab, setTab] = useState('owned');
   const navigate = useNavigate();
   const ownedQuery = useQuery({
@@ -28,16 +30,16 @@ export default function MyProjectsPage() {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">My projects</h1>
-          <p className="mt-1 text-sm text-slate-600">Projects you own and projects you have joined.</p>
+          <p className="mt-1 text-sm text-slate-700">Projects you own and projects you have joined.</p>
         </div>
         <Button onClick={() => navigate('/projects/new')}>Create project</Button>
       </header>
       <div role="tablist" aria-label="My projects" className="flex gap-2 border-b border-slate-200">
-        <button type="button" role="tab" aria-selected={tab === 'owned'} onClick={() => setTab('owned')} className={`border-b-2 px-4 py-2 text-sm font-medium ${tab === 'owned' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>Owned</button>
-        <button type="button" role="tab" aria-selected={tab === 'joined'} onClick={() => setTab('joined')} className={`border-b-2 px-4 py-2 text-sm font-medium ${tab === 'joined' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>Joined</button>
+        <button type="button" role="tab" aria-selected={tab === 'owned'} onClick={() => setTab('owned')} className={`border-b-2 px-4 py-2 text-sm font-medium ${tab === 'owned' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-700 hover:text-slate-900'}`}>Owned</button>
+        <button type="button" role="tab" aria-selected={tab === 'joined'} onClick={() => setTab('joined')} className={`border-b-2 px-4 py-2 text-sm font-medium ${tab === 'joined' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-700 hover:text-slate-900'}`}>Joined</button>
       </div>
       {query.isLoading ? (
-        <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-500">Loading projects...</p></div>
+        <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-700">Loading projects...</p></div>
       ) : query.error ? (
         <ErrorBanner error={query.error} onRetry={() => query.refetch()} />
       ) : query.data.items.length === 0 ? (
@@ -53,9 +55,9 @@ export default function MyProjectsPage() {
           </div>
         )
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {query.data.items.map((project) => <ProjectCard key={project.id} project={project} />)}
-        </div>
+        <ul role="list" className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {query.data.items.map((project) => <li key={project.id}><ProjectCard project={project} /></li>)}
+        </ul>
       )}
     </div>
   );

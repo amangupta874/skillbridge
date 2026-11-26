@@ -10,6 +10,7 @@ import Spinner from '../components/Spinner.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import Pagination from '../components/Pagination.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const PAGE_SIZE = 12;
 const BOXES = [
@@ -19,6 +20,7 @@ const BOXES = [
 ];
 
 export default function ExchangesPage() {
+  usePageTitle('Skill exchanges');
   const [box, setBox] = useState('all');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
@@ -49,11 +51,11 @@ export default function ExchangesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Skill exchanges</h1>
-        <p className="mt-1 text-sm text-slate-600">Manage requests to share and learn skills.</p>
+        <h1 tabIndex={-1} className="text-2xl font-bold text-slate-900">Skill exchanges</h1>
+        <p className="mt-1 text-sm text-slate-700">Manage requests to share and learn skills.</p>
       </div>
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex gap-2" role="tablist" aria-label="Exchange requests">
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Exchange requests">
           {BOXES.map((tab) => <button key={tab.value} type="button" role="tab" aria-selected={box === tab.value} onClick={() => selectBox(tab.value)} className={`rounded-lg px-3 py-2 text-sm font-medium ${box === tab.value ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50'}`}>{tab.label}</button>)}
         </div>
         <div className="w-full sm:w-52">
@@ -73,9 +75,21 @@ export default function ExchangesPage() {
       )}
       {exchangesQuery.data?.items?.length > 0 && (
         <>
-          <div className="space-y-4">
-            {exchangesQuery.data.items.map((exchange) => <ExchangeCard key={exchange.id} exchange={exchange} currentUserId={user?.id} onStatusChange={(id, nextStatus) => statusMutation.mutateAsync({ id, nextStatus })} saving={statusMutation.isPending && statusMutation.variables?.id === exchange.id} />)}
-          </div>
+          <ul role="list" className="space-y-4">
+            {exchangesQuery.data.items.map((exchange) => (
+              <li key={exchange.id}>
+                <ExchangeCard
+                  exchange={exchange}
+                  currentUserId={user?.id}
+                  onStatusChange={(id, nextStatus) => statusMutation.mutateAsync({ id, nextStatus })}
+                  saving={statusMutation.isPending}
+                  error={statusMutation.variables?.id === exchange.id ? statusMutation.error : null}
+                  failedStatus={statusMutation.variables?.nextStatus}
+                  onCancelError={statusMutation.reset}
+                />
+              </li>
+            ))}
+          </ul>
           <Pagination page={exchangesQuery.data.meta.page} totalPages={exchangesQuery.data.meta.totalPages} onPageChange={setPage} label="Exchange pages" />
         </>
       )}

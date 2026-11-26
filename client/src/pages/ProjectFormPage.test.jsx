@@ -41,7 +41,8 @@ describe('ProjectFormPage', () => {
 
   it('shows validation errors for the required project fields', async () => {
     renderForm();
-    fireEvent.click(await screen.findByRole('button', { name: 'Publish' }));
+    await screen.findByRole('option', { name: 'Community' });
+    fireEvent.click(screen.getByRole('button', { name: 'Publish' }));
 
     expect(await screen.findByText('Use at least 5 characters')).toBeInTheDocument();
     expect(screen.getByText('Use at least 20 characters')).toBeInTheDocument();

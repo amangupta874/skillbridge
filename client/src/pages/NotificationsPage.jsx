@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getNotifications, markAllNotificationsRead } from '../api/notifications.js';
 import Button from '../components/Button.jsx';
@@ -7,8 +7,11 @@ import ErrorBanner from '../components/ErrorBanner.jsx';
 import NotificationList from '../components/NotificationList.jsx';
 import Pagination from '../components/Pagination.jsx';
 import Spinner from '../components/Spinner.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 export default function NotificationsPage() {
+  usePageTitle('Notifications');
+  const unreadId = useId();
   const queryClient = useQueryClient();
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [page, setPage] = useState(1);
@@ -34,15 +37,15 @@ export default function NotificationsPage() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Notifications</h1>
-        <Button variant="secondary" loading={markAllRead.isPending} onClick={() => markAllRead.mutate()}>
+        <Button variant="secondary" loading={markAllRead.isPending} disabled={!notificationsQuery.data?.meta.total} onClick={() => markAllRead.mutate()}>
           Mark all as read
         </Button>
       </header>
-      <label className="flex w-fit items-center gap-2 text-sm font-medium text-slate-700">
-        <input type="checkbox" checked={unreadOnly} onChange={toggleUnread} className="size-4 accent-indigo-600" />
+      <label htmlFor={unreadId} className="flex w-fit items-center gap-2 text-sm font-medium text-slate-700">
+        <input id={unreadId} type="checkbox" checked={unreadOnly} onChange={toggleUnread} className="size-4 accent-indigo-600" />
         Unread only
       </label>
-      <ErrorBanner error={markAllRead.error} />
+      <ErrorBanner error={markAllRead.error} onRetry={() => markAllRead.mutate()} />
       {notificationsQuery.isLoading && <Spinner />}
       {notificationsQuery.error && <ErrorBanner error={notificationsQuery.error} onRetry={() => notificationsQuery.refetch()} />}
       {notificationsQuery.isSuccess && (

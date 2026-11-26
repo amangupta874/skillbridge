@@ -20,8 +20,11 @@ import { formatLabel } from '../utils/labels.js';
 import { projectStatusTransitions } from '../utils/projectStatus.js';
 import { applicationSchema } from '../schemas/application.schema.js';
 import { fieldErrorsFromApiError } from '../api/client.js';
+import PageState from '../components/PageState.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 export default function ProjectDetailPage() {
+  usePageTitle('Project details');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -52,10 +55,10 @@ export default function ProjectDetailPage() {
       ]);
     },
     onError: (statusError) => {
-      setPendingStatus(null);
       toast.error(statusError.message);
     },
   });
+  const [applyError, setApplyError] = useState(null);
   const sendApplication = useMutation({
     mutationFn: (message) => applyToProject(id, message),
     onSuccess: async () => {
@@ -70,7 +73,7 @@ export default function ProjectDetailPage() {
     onError: (applicationError) => {
       const fieldErrors = fieldErrorsFromApiError(applicationError);
       if (fieldErrors.message) setApplicationError('message', { type: 'server', message: fieldErrors.message });
-      else toast.error(applicationError.message);
+      else setApplyError(applicationError);
     },
   });
   const withdrawApplication = useMutation({
@@ -84,35 +87,40 @@ export default function ProjectDetailPage() {
       ]);
     },
     onError: (withdrawError) => {
-      setConfirmWithdraw(false);
       toast.error(withdrawError.message);
     },
   });
 
   if (isLoading) {
-    return <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-500">Loading project...</p></div>;
+    return <PageState title="Project details"><Spinner size="lg" /></PageState>;
   }
   if (error?.status === 404) {
-    return <EmptyState title="Project not found" description="This project may have been removed or is not available to you." actionLabel="Browse projects" onAction={() => navigate('/projects')} />;
+    return <EmptyState heading="h1" title="Project not found" description="This project may have been removed or is not available to you." actionLabel="Browse projects" onAction={() => navigate('/projects')} />;
   }
-  if (error) return <ErrorBanner error={error} onRetry={() => refetch()} />;
+  if (error) return <PageState title="Project details"><ErrorBanner error={error} onRetry={() => refetch()} /></PageState>;
   if (!project) {
-    return <EmptyState title="Project not found" description="This project may have been removed or is not available to you." actionLabel="Browse projects" onAction={() => navigate('/projects')} />;
+    return <EmptyState heading="h1" title="Project not found" description="This project may have been removed or is not available to you." actionLabel="Browse projects" onAction={() => navigate('/projects')} />;
   }
+
+  const submitApplication = handleApplicationSubmit(({ message }) => {
+    if (sendApplication.isPending) return;
+    setApplyError(null);
+    sendApplication.mutate(message);
+  });
 
   const seatsUsedPercent = Math.min(100, Math.round((project.seatsTaken / project.maxTeamSize) * 100));
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <Link to="/projects" className="text-sm font-medium text-indigo-700 hover:text-indigo-900">← Back to projects</Link>
+      <Link to="/projects" className="text-sm font-medium text-indigo-700 hover:text-indigo-900"><span aria-hidden="true">← </span>Back to projects</Link>
       <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-medium text-indigo-700">{project.category.name}</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{project.title}</h1>
+            <h1 tabIndex={-1} className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{project.title}</h1>
           </div>
           {project.myRole === 'OWNER' && (
-            <Link to={`/projects/${project.id}/edit`}><Button variant="secondary">Edit</Button></Link>
+            <Button to={`/projects/${project.id}/edit`} variant="secondary">Edit</Button>
           )}
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -126,7 +134,7 @@ export default function ProjectDetailPage() {
         <section className="mt-6">
           <div className="flex items-center justify-between text-sm">
             <h2 className="font-semibold text-slate-900">Team seats</h2>
-            <span className="text-slate-600">{project.seatsTaken} of {project.maxTeamSize} filled · {project.seatsLeft} left</span>
+            <span className="text-slate-700">{project.seatsTaken} of {project.maxTeamSize} filled · {project.seatsLeft} left</span>
           </div>
           <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-label="Team seats filled" aria-valuemin="0" aria-valuemax={project.maxTeamSize} aria-valuenow={project.seatsTaken}>
             <div className="h-full rounded-full bg-indigo-600" style={{ width: `${seatsUsedPercent}%` }} />
@@ -143,7 +151,7 @@ export default function ProjectDetailPage() {
             <h2 className="text-sm font-semibold text-slate-900">Project status</h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {projectStatusTransitions[project.status].map((status) => (
-                <Button key={status} variant={status === 'ARCHIVED' ? 'danger' : 'secondary'} disabled={changeStatus.isPending} onClick={() => setPendingStatus(status)}>
+                <Button key={status} variant={status === 'ARCHIVED' ? 'danger' : 'secondary'} disabled={changeStatus.isPending} aria-haspopup="dialog" onClick={() => { changeStatus.reset(); setPendingStatus(status); }}>
                   {formatLabel(status)}
                 </Button>
               ))}
@@ -153,18 +161,18 @@ export default function ProjectDetailPage() {
         {project.myRole === 'OWNER' ? (
           <section className="mt-6 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-5">
             <Link to={`/projects/${project.id}/matches`} className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-xs hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Find teammates</Link>
-            <Link to={`/projects/${project.id}/applications`}><Button variant="secondary">View applications</Button></Link>
+            <Button to={`/projects/${project.id}/applications`} variant="secondary">View applications</Button>
           </section>
         ) : (
           <section className="mt-6 border-t border-slate-100 pt-5">
             {project.myApplication?.status === 'PENDING' ? (
-              <Button variant="secondary" onClick={() => setConfirmWithdraw(true)}>Withdraw application</Button>
+              <Button variant="secondary" aria-haspopup="dialog" onClick={() => { withdrawApplication.reset(); setConfirmWithdraw(true); }}>Withdraw application</Button>
             ) : ['ACCEPTED', 'REJECTED'].includes(project.myApplication?.status) ? (
               <Badge variant={project.myApplication.status}>{formatLabel(project.myApplication.status)}</Badge>
             ) : project.status === 'OPEN' && !project.isFull ? (
-              <Button onClick={() => setShowApplyDialog(true)}>Apply</Button>
+              <Button aria-haspopup="dialog" onClick={() => { setApplyError(null); setShowApplyDialog(true); }}>Apply</Button>
             ) : (
-              <p className="text-sm text-slate-600">{project.isFull ? 'This project is full.' : 'This project is not accepting applications.'}</p>
+              <p className="text-sm text-slate-700">{project.isFull ? 'This project is full.' : 'This project is not accepting applications.'}</p>
             )}
           </section>
         )}
@@ -177,18 +185,18 @@ export default function ProjectDetailPage() {
         <Card>
           <h2 className="text-base font-semibold text-slate-900">Team members</h2>
           {project.members.length ? (
-            <ul className="mt-2 space-y-2">{project.members.map((member) => <li key={member.id} className="text-sm text-slate-700">{member.fullName}</li>)}</ul>
-          ) : <p className="mt-2 text-sm text-slate-500">No members have joined yet.</p>}
+            <ul role="list" className="mt-2 space-y-2">{project.members.map((member) => <li key={member.id} className="text-sm text-slate-700">{member.fullName}</li>)}</ul>
+          ) : <p className="mt-2 text-sm text-slate-700">No members have joined yet.</p>}
         </Card>
       </div>
       {(project.hoursPerWeek != null || project.deadline || project.githubUrl || project.demoUrl) && (
         <Card>
           <h2 className="text-base font-semibold text-slate-900">Project details</h2>
           <dl className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-            {project.hoursPerWeek != null && <div><dt className="font-medium text-slate-500">Time needed</dt><dd className="mt-1 text-slate-800">{project.hoursPerWeek} hours per week</dd></div>}
-            {project.deadline && <div><dt className="font-medium text-slate-500">Deadline</dt><dd className="mt-1 text-slate-800">{new Date(project.deadline).toLocaleDateString()}</dd></div>}
-            {project.githubUrl && <div><dt className="font-medium text-slate-500">GitHub</dt><dd className="mt-1"><a className="break-all text-indigo-700 underline" href={project.githubUrl} target="_blank" rel="noreferrer">{project.githubUrl}</a></dd></div>}
-            {project.demoUrl && <div><dt className="font-medium text-slate-500">Demo</dt><dd className="mt-1"><a className="break-all text-indigo-700 underline" href={project.demoUrl} target="_blank" rel="noreferrer">{project.demoUrl}</a></dd></div>}
+            {project.hoursPerWeek != null && <div><dt className="font-medium text-slate-700">Time needed</dt><dd className="mt-1 text-slate-800">{project.hoursPerWeek} hours per week</dd></div>}
+            {project.deadline && <div><dt className="font-medium text-slate-700">Deadline</dt><dd className="mt-1 text-slate-800">{new Date(project.deadline).toLocaleDateString()}</dd></div>}
+            {project.githubUrl && <div><dt className="font-medium text-slate-700">GitHub</dt><dd className="mt-1"><a className="break-all text-indigo-700 underline" href={project.githubUrl} target="_blank" rel="noreferrer">{project.githubUrl}</a></dd></div>}
+            {project.demoUrl && <div><dt className="font-medium text-slate-700">Demo</dt><dd className="mt-1"><a className="break-all text-indigo-700 underline" href={project.demoUrl} target="_blank" rel="noreferrer">{project.demoUrl}</a></dd></div>}
           </dl>
         </Card>
       )}
@@ -199,11 +207,12 @@ export default function ProjectDetailPage() {
         confirmLabel={`Set to ${formatLabel(pendingStatus || '')}`}
         danger={pendingStatus === 'ARCHIVED'}
         loading={changeStatus.isPending}
-        onCancel={() => setPendingStatus(null)}
+        error={changeStatus.error}
+        onCancel={() => { setPendingStatus(null); changeStatus.reset(); }}
         onConfirm={() => changeStatus.mutate(pendingStatus)}
       />
-      <Modal open={showApplyDialog} title="Apply to this project" onClose={() => !sendApplication.isPending && setShowApplyDialog(false)}>
-        <form className="space-y-4" onSubmit={handleApplicationSubmit(({ message }) => sendApplication.mutate(message))} noValidate>
+      <Modal open={showApplyDialog} title="Apply to this project" closeDisabled={sendApplication.isPending} onClose={() => setShowApplyDialog(false)}>
+        <form className="space-y-4" onSubmit={submitApplication} noValidate>
           <Textarea
             label="Message to the project owner"
             name="message"
@@ -215,7 +224,8 @@ export default function ProjectDetailPage() {
             error={applicationErrors.message?.message}
             {...registerApplication('message')}
           />
-          <div className="flex justify-end gap-3">
+          <ErrorBanner error={applyError} onRetry={submitApplication} />
+          <div className="flex flex-wrap justify-end gap-3">
             <Button variant="secondary" disabled={sendApplication.isPending} onClick={() => setShowApplyDialog(false)}>Cancel</Button>
             <Button type="submit" loading={sendApplication.isPending}>Send application</Button>
           </div>
@@ -228,7 +238,8 @@ export default function ProjectDetailPage() {
         confirmLabel="Withdraw application"
         danger
         loading={withdrawApplication.isPending}
-        onCancel={() => setConfirmWithdraw(false)}
+        error={withdrawApplication.error}
+        onCancel={() => { setConfirmWithdraw(false); withdrawApplication.reset(); }}
         onConfirm={() => withdrawApplication.mutate()}
       />
     </div>
