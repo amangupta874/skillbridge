@@ -15,6 +15,13 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 - [ ] 21 FEATURE FREEZE         - [ ] 22-31 buffer, rehearsal, code defence, final checks
 
 ## Notes per task (files, tests added, manual checks, issues)
+### Live regression and documentation — 2026-11-26
+- **Live regression**: Used two fresh accounts, `regress-c@demo.skillbridge.test` and `regress-d@demo.skillbridge.test`, with a generated password kept in a shell variable. The full project, application, match, acceptance, notification, exchange, and logout flow matched the expected status codes and response assertions from `docs/05_API_SPEC.md`. See the task report for the status table. Demo-domain records are intentionally left in place for the seed cleanup.
+- **README**: Rewrote the root README from the current schema, route/module files, client routes, package manifests, CI workflow, and deployment/demo docs. Added live links, features, Mermaid architecture and 18-table ER diagrams, a normalization note, local setup, environment-variable reference, verified test counts, deployment and security summaries, demo links, limitations, screenshots placeholder, and AI acknowledgements.
+- **Verification**: Before editing, `npm ci`, `cd server && npx prisma generate`, and `npm run verify` passed on synced `main`: 175 server tests, 86 client tests, lint, and client build.
+- **Differences found while documenting**: The current route tree does not mount `/analytics/skill-demand`, despite the older API and frontend specifications describing it. The README therefore does not list analytics as an available feature. The frontend currently has no `/trends` route.
+- **Tests added**: None; this is documentation work.
+
 ### Day 26 (Demo data and notes — 2026-11-17)
 - **Files created**: `server/prisma/seed-demo.js`, `scripts/concurrency-demo.mjs`, `docs/DEMO_SCRIPT.md`, and `docs/performance-notes.md`.
 - **Files changed**: `server/package.json` adds `db:seed:demo`.
