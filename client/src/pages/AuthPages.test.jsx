@@ -125,7 +125,11 @@ describe('Auth Pages', () => {
       fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Account is deactivated')).toBeInTheDocument();
+        const email = screen.getByRole('textbox', { name: 'Email Address' });
+        const errorMessage = screen.getByRole('alert');
+        expect(email).toHaveAttribute('aria-describedby', errorMessage.id);
+        expect(email).toHaveAttribute('aria-invalid', 'true');
+        expect(email).toHaveAccessibleDescription('Account is deactivated');
       });
     });
 

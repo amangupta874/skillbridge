@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
   const {
     data: user = null,
     isLoading,
+    error: sessionError,
     refetch,
   } = useQuery({
     queryKey: ['me'],
@@ -45,17 +46,15 @@ export function AuthProvider({ children }) {
   );
 
   const logout = useCallback(async () => {
-    try {
-      await apiLogout();
-    } finally {
-      queryClient.clear();
-      queryClient.setQueryData(['me'], null);
-    }
+    await apiLogout();
+    queryClient.clear();
+    queryClient.setQueryData(['me'], null);
   }, [queryClient]);
 
   const value = {
     user,
     isLoading,
+    sessionError,
     refetchUser: refetch,
     login,
     register,

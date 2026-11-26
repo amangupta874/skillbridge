@@ -8,6 +8,7 @@ import ProjectCard from '../components/ProjectCard.jsx';
 import ProjectFilters from '../components/ProjectFilters.jsx';
 import Spinner from '../components/Spinner.jsx';
 import Button from '../components/Button.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const defaultLimit = '12';
 
@@ -25,6 +26,7 @@ function filtersFromParams(params) {
 }
 
 export default function ProjectsPage() {
+  usePageTitle('Projects');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = filtersFromParams(searchParams);
@@ -63,7 +65,7 @@ export default function ProjectsPage() {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Discover projects</h1>
-          <p className="mt-1 text-sm text-slate-600">Find a project and bring your skills to a team.</p>
+          <p className="mt-1 text-sm text-slate-700">Find a project and bring your skills to a team.</p>
         </div>
         <Button onClick={() => navigate('/projects/new')}>Create project</Button>
       </header>
@@ -71,7 +73,7 @@ export default function ProjectsPage() {
       {isLoading ? (
         <div className="flex flex-col items-center gap-3 py-16" data-testid="projects-loading">
           <Spinner size="lg" />
-          <p className="text-sm text-slate-500">Loading projects...</p>
+          <p className="text-sm text-slate-700">Loading projects...</p>
         </div>
       ) : error ? (
         <ErrorBanner error={error} onRetry={() => refetch()} />
@@ -79,10 +81,10 @@ export default function ProjectsPage() {
         <EmptyState title="No projects match your filters" actionLabel="Clear filters" onAction={clearFilters} />
       ) : (
         <>
-          <p className="text-sm text-slate-500" aria-live="polite">{projectsPage.meta.total} projects found</p>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {projectsPage.items.map((project) => <ProjectCard key={project.id} project={project} />)}
-          </div>
+          <p className="text-sm text-slate-700" aria-live="polite">{projectsPage.meta.total} projects found</p>
+          <ul role="list" className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {projectsPage.items.map((project) => <li key={project.id}><ProjectCard project={project} /></li>)}
+          </ul>
           <Pagination page={Number(projectsPage.meta.page)} totalPages={projectsPage.meta.totalPages} onPageChange={changePage} />
         </>
       )}

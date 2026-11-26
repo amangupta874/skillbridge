@@ -12,6 +12,7 @@ import Pagination from '../components/Pagination.jsx';
 import Spinner from '../components/Spinner.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { formatLabel } from '../utils/labels.js';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const statusOptions = [
   ['all', 'All'],
@@ -22,6 +23,7 @@ const statusOptions = [
 ];
 
 export default function ApplicationsPage() {
+  usePageTitle('My applications');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -44,7 +46,6 @@ export default function ApplicationsPage() {
       ]);
     },
     onError: (error) => {
-      setApplicationToWithdraw(null);
       toast.error(error.message);
       queryClient.invalidateQueries({ queryKey: ['applications', 'mine'] });
     },
@@ -53,8 +54,8 @@ export default function ApplicationsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">My applications</h1>
-        <p className="mt-1 text-sm text-slate-600">Track the projects you have applied to.</p>
+        <h1 tabIndex={-1} className="text-2xl font-bold tracking-tight text-slate-900">My applications</h1>
+        <p className="mt-1 text-sm text-slate-700">Track the projects you have applied to.</p>
       </header>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filter applications by status">
         {statusOptions.map(([value, label]) => (
@@ -62,7 +63,7 @@ export default function ApplicationsPage() {
         ))}
       </div>
       {applicationsQuery.isLoading ? (
-        <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-500">Loading applications...</p></div>
+        <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-700">Loading applications...</p></div>
       ) : applicationsQuery.error ? (
         <ErrorBanner error={applicationsQuery.error} onRetry={() => applicationsQuery.refetch()} />
       ) : applicationsQuery.data.items.length === 0 ? (
@@ -73,9 +74,9 @@ export default function ApplicationsPage() {
         )
       ) : (
         <>
-          <div className="space-y-4">
+          <ul role="list" className="space-y-4">
             {applicationsQuery.data.items.map((application) => (
-              <Card key={application.id}>
+              <Card as="li" key={application.id}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <h2 className="text-lg font-semibold text-slate-900">
                     <Link to={`/projects/${application.project.id}`} className="rounded-sm hover:text-indigo-700 focus-visible:outline-2 focus-visible:outline-indigo-600">{application.project.title}</Link>
@@ -83,15 +84,15 @@ export default function ApplicationsPage() {
                   <Badge variant={application.status}>{formatLabel(application.status)}</Badge>
                 </div>
                 <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-700">{application.message}</p>
-                <p className="mt-3 text-xs text-slate-500">Applied {new Date(application.createdAt).toLocaleDateString()}</p>
+                <p className="mt-3 text-xs text-slate-700">Applied {new Date(application.createdAt).toLocaleDateString()}</p>
                 {application.allowedTransitions.includes('WITHDRAWN') && (
                   <div className="mt-4 border-t border-slate-100 pt-4">
-                    <Button variant="secondary" onClick={() => setApplicationToWithdraw(application)}>Withdraw application</Button>
+                    <Button variant="secondary" disabled={withdrawApplication.isPending} aria-haspopup="dialog" onClick={() => { withdrawApplication.reset(); setApplicationToWithdraw(application); }}>Withdraw application</Button>
                   </div>
                 )}
               </Card>
             ))}
-          </div>
+          </ul>
           <Pagination label="Application pages" page={applicationsQuery.data.meta.page} totalPages={applicationsQuery.data.meta.totalPages} onPageChange={setPage} />
         </>
       )}
@@ -102,7 +103,8 @@ export default function ApplicationsPage() {
         confirmLabel="Withdraw application"
         danger
         loading={withdrawApplication.isPending}
-        onCancel={() => setApplicationToWithdraw(null)}
+        error={withdrawApplication.error}
+        onCancel={() => { setApplicationToWithdraw(null); withdrawApplication.reset(); }}
         onConfirm={() => withdrawApplication.mutate(applicationToWithdraw.id)}
       />
     </div>

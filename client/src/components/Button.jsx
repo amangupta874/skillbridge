@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import Spinner from './Spinner.jsx';
 
 export default function Button({
@@ -9,12 +10,13 @@ export default function Button({
   disabled = false,
   className = '',
   onClick,
+  to,
   ...props
 }) {
   const variantClasses = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:outline-indigo-600 disabled:bg-indigo-400',
-    secondary: 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus-visible:outline-slate-500 disabled:bg-slate-100 disabled:text-slate-400',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600 disabled:bg-red-400',
+    primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:outline-indigo-600 disabled:bg-indigo-100 disabled:text-slate-700',
+    secondary: 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus-visible:outline-slate-500 disabled:bg-slate-100 disabled:text-slate-700',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600 disabled:bg-red-100 disabled:text-slate-700',
   };
 
   const sizeClasses = {
@@ -25,12 +27,20 @@ export default function Button({
 
   const isDisabled = disabled || loading;
 
+  const buttonClass = `inline-flex items-center justify-center rounded-lg shadow-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ${variantClasses[variant] || variantClasses.primary} ${sizeClasses[size] || sizeClasses.md} ${className}`;
+
+  if (to) return <Link to={to} className={buttonClass} onClick={onClick} {...props}>{children}</Link>;
+
   return (
     <button
       type={type}
       disabled={isDisabled}
-      onClick={onClick}
-      className={`inline-flex items-center justify-center rounded-lg shadow-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed ${variantClasses[variant] || variantClasses.primary} ${sizeClasses[size] || sizeClasses.md} ${className}`}
+      aria-busy={loading || undefined}
+      onClick={(event) => {
+        if (props['aria-haspopup'] === 'dialog') event.currentTarget.focus();
+        onClick?.(event);
+      }}
+      className={buttonClass}
       {...props}
     >
       {loading && <Spinner size="sm" className="mr-2 text-current" />}

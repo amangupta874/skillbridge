@@ -37,7 +37,7 @@ export function ToastProvider({ children }) {
       {children}
       <div
         aria-live="polite"
-        className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"
+        className="pointer-events-none fixed inset-x-4 bottom-4 z-50 ml-auto flex max-w-sm flex-col gap-2 [overflow-wrap:anywhere]"
       >
         {toasts.map((t) => (
           <div
@@ -55,10 +55,10 @@ export function ToastProvider({ children }) {
             <button
               type="button"
               onClick={() => removeToast(t.id)}
-              className="text-current opacity-70 hover:opacity-100 font-bold ml-2"
+              className="ml-2 rounded font-bold text-current focus-visible:outline-2 focus-visible:outline-current"
               aria-label="Dismiss notification"
             >
-              ×
+              <span aria-hidden="true">×</span>
             </button>
           </div>
         ))}

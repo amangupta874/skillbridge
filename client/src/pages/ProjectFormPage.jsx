@@ -15,6 +15,8 @@ import Textarea from '../components/Textarea.jsx';
 import { fieldErrorsFromApiError } from '../api/client.js';
 import { projectFormDefaults, projectFormSchema } from '../schemas/project.schema.js';
 import { formatLabel } from '../utils/labels.js';
+import PageState from '../components/PageState.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const projectLevels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
 const projectFields = ['title', 'description', 'categoryId', 'difficulty', 'maxTeamSize', 'hoursPerWeek', 'deadline', 'githubUrl', 'demoUrl', 'skills'];
@@ -61,6 +63,7 @@ function projectFormValues(project) {
 }
 
 export default function ProjectFormPage({ edit = false }) {
+  usePageTitle(edit ? 'Edit project' : 'Create a project');
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -99,7 +102,7 @@ export default function ProjectFormPage({ edit = false }) {
       let foundFieldError = false;
       for (const [field, message] of Object.entries(fieldErrors)) {
         if (projectFields.includes(field) || field.startsWith('skills.')) {
-          setError(field, { type: 'server', message });
+          setError(field.startsWith('skills.') ? 'skills' : field, { type: 'server', message });
           foundFieldError = true;
         }
       }
@@ -108,18 +111,20 @@ export default function ProjectFormPage({ edit = false }) {
   });
 
   if (edit && projectQuery.isLoading) {
-    return <div className="flex flex-col items-center gap-3 py-16"><Spinner size="lg" /><p className="text-sm text-slate-500">Loading project...</p></div>;
+    return <PageState title="Project form"><Spinner size="lg" /></PageState>;
   }
   if (edit && projectQuery.error?.status === 404) {
-    return <div className="mx-auto max-w-xl space-y-4 py-12 text-center"><h1 className="text-xl font-semibold text-slate-900">You are not allowed to edit this project</h1><p className="text-sm text-slate-600">The project may not exist or may not be available to you.</p><Link to="/projects" className="font-medium text-indigo-700 underline">Browse projects</Link></div>;
+    return <div className="mx-auto max-w-xl space-y-4 py-12 text-center"><h1 className="text-xl font-semibold text-slate-900">You are not allowed to edit this project</h1><p className="text-sm text-slate-700">The project may not exist or may not be available to you.</p><Link to="/projects" className="font-medium text-indigo-700 underline">Browse projects</Link></div>;
   }
-  if (edit && projectQuery.error) return <ErrorBanner error={projectQuery.error} onRetry={() => projectQuery.refetch()} />;
+  if (edit && projectQuery.error) return <PageState title="Project form"><ErrorBanner error={projectQuery.error} onRetry={() => projectQuery.refetch()} /></PageState>;
   if (edit && projectQuery.data?.myRole !== 'OWNER') {
     return <div className="mx-auto max-w-xl space-y-4 py-12 text-center"><h1 className="text-xl font-semibold text-slate-900">You are not allowed to edit this project</h1><Link to={`/projects/${id}`} className="font-medium text-indigo-700 underline">Back to project</Link></div>;
   }
   if (edit && ['COMPLETED', 'ARCHIVED'].includes(projectQuery.data?.status)) {
     return <div className="mx-auto max-w-xl space-y-4 py-12 text-center"><h1 className="text-xl font-semibold text-slate-900">This project can no longer be edited</h1><Link to={`/projects/${id}`} className="font-medium text-indigo-700 underline">Back to project</Link></div>;
   }
+
+  const categories = lookupsQuery.data?.projectCategories ?? [];
 
   function submitForm(values, event) {
     if (saveProject.isPending) return;
@@ -131,18 +136,23 @@ export default function ProjectFormPage({ edit = false }) {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header>
-        <Link to={edit ? `/projects/${id}` : '/projects'} className="text-sm font-medium text-indigo-700 hover:text-indigo-900">← {edit ? 'Back to project' : 'Back to projects'}</Link>
+        <Link to={edit ? `/projects/${id}` : '/projects'} className="text-sm font-medium text-indigo-700 hover:text-indigo-900"><span aria-hidden="true">← </span>{edit ? 'Back to project' : 'Back to projects'}</Link>
         <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">{edit ? 'Edit project' : 'Create a project'}</h1>
       </header>
       {lookupsQuery.error && <ErrorBanner error={lookupsQuery.error} onRetry={() => lookupsQuery.refetch()} />}
-      {saveError && <ErrorBanner error={saveError} />}
+      {lookupsQuery.isLoading && <p role="status" className="text-sm text-slate-700">Loading categories…</p>}
+      {lookupsQuery.isSuccess && !categories.length && <p className="text-sm text-slate-700">No project categories are available.</p>}
+      {saveError && <ErrorBanner error={saveError} onRetry={handleSubmit((values) => {
+        setSaveError(null);
+        saveProject.mutate({ body: toProjectBody(values, saveProject.variables.body.status, edit) });
+      })} />}
       <form className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 shadow-xs sm:p-7" onSubmit={handleSubmit(submitForm)} noValidate>
         <Input name="title" label="Project title" required maxLength={100} hint="5 to 100 characters." error={errors.title?.message} {...register('title')} />
         <Textarea name="description" label="Description" required rows={6} maxLength={2000} hint="20 to 2000 characters." error={errors.description?.message} {...register('description')} />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Select name="categoryId" label="Category" required disabled={lookupsQuery.isLoading || !lookupsQuery.data} error={errors.categoryId?.message} {...register('categoryId')}>
+          <Select name="categoryId" label="Category" required disabled={!categories.length} error={errors.categoryId?.message} {...register('categoryId')}>
             <option value="">Choose a category</option>
-            {(lookupsQuery.data?.projectCategories || []).map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+            {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
           </Select>
           <Select name="difficulty" label="Difficulty" required error={errors.difficulty?.message} {...register('difficulty')}>
             {projectLevels.map((level) => <option key={level} value={level}>{formatLabel(level)}</option>)}
@@ -164,11 +174,11 @@ export default function ProjectFormPage({ edit = false }) {
         />
         <div className="flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-5">
           {edit ? (
-            <Button type="submit" value="OPEN" loading={saveProject.isPending}>Save changes</Button>
+            <Button type="submit" value="OPEN" loading={saveProject.isPending} disabled={!categories.length}>Save changes</Button>
           ) : (
             <>
-              <Button type="submit" value="DRAFT" variant="secondary" disabled={saveProject.isPending}>Save as draft</Button>
-              <Button type="submit" value="OPEN" loading={saveProject.isPending}>Publish</Button>
+              <Button type="submit" value="DRAFT" variant="secondary" disabled={saveProject.isPending || !categories.length}>Save as draft</Button>
+              <Button type="submit" value="OPEN" loading={saveProject.isPending} disabled={!categories.length}>Publish</Button>
             </>
           )}
         </div>

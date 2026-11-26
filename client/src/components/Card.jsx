@@ -1,11 +1,11 @@
-export default function Card({ children, className = '', ...props }) {
+export default function Card({ children, className = '', as: Element = 'div', ...props }) {
   return (
-    <div
+    <Element
       className={`rounded-xl border border-slate-200 bg-white p-6 shadow-xs ${className}`}
       {...props}
     >
       {children}
-    </div>
+    </Element>
   );
 }
 
@@ -19,15 +19,15 @@ export function CardHeader({ children, className = '', ...props }) {
 
 export function CardTitle({ children, className = '', ...props }) {
   return (
-    <h3 className={`text-lg font-bold text-slate-900 tracking-tight ${className}`} {...props}>
+    <h2 className={`text-lg font-bold text-slate-900 tracking-tight ${className}`} {...props}>
       {children}
-    </h3>
+    </h2>
   );
 }
 
 export function CardDescription({ children, className = '', ...props }) {
   return (
-    <p className={`text-sm text-slate-500 ${className}`} {...props}>
+    <p className={`text-sm text-slate-700 ${className}`} {...props}>
       {children}
     </p>
   );

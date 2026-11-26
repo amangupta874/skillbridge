@@ -4,11 +4,11 @@ export default function Pagination({ page, totalPages, onPageChange, label = 'Pa
   if (totalPages <= 1) return null;
 
   return (
-    <nav aria-label={label} className="flex items-center justify-center gap-4">
+    <nav aria-label={label} className="flex flex-wrap items-center justify-center gap-4">
       <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
         Previous
       </Button>
-      <p className="text-sm text-slate-600" aria-live="polite">Page {page} of {totalPages}</p>
+      <p className="text-sm text-slate-700" aria-live="polite">Page {page} of {totalPages}</p>
       <Button variant="secondary" size="sm" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
         Next
       </Button>

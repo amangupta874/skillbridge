@@ -61,7 +61,7 @@ describe('project status controls', () => {
 
     await screen.findByRole('heading', { name: baseProject.title });
     for (const label of allowedLabels) expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
-    expect(screen.getAllByRole('button').filter((button) => ['Open', 'In progress', 'Completed', 'Archived'].includes(button.textContent))).toHaveLength(allowedLabels.length);
+    expect(screen.queryAllByRole('button').filter((button) => ['Open', 'In progress', 'Completed', 'Archived'].includes(button.textContent))).toHaveLength(allowedLabels.length);
   });
 
   it('asks for confirmation before patching a status', async () => {

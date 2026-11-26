@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getUserById } from '../api/users.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -12,8 +12,11 @@ import EmptyState from '../components/EmptyState.jsx';
 import { formatDate } from '../utils/date.js';
 import { useState } from 'react';
 import RequestExchangeDialog from '../components/RequestExchangeDialog.jsx';
+import PageState from '../components/PageState.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 export default function PublicProfilePage() {
+  usePageTitle('Student profile');
   const { id } = useParams();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
@@ -32,33 +35,28 @@ export default function PublicProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20" data-testid="profile-loading">
+      <PageState title="Student profile">
         <Spinner size="lg" />
-        <p className="mt-4 text-sm text-slate-500">Loading student profile...</p>
-      </div>
+      </PageState>
     );
   }
 
-  if (error) {
+  if (error && error.status !== 404) {
     return (
-      <div className="space-y-4 py-8 max-w-xl mx-auto">
+      <PageState title="Student profile">
         <ErrorBanner error={error} onRetry={() => refetch()} />
         <div className="text-center pt-2">
-          <Link to="/people">
-            <Button variant="secondary" size="sm">
-              Back to People
-            </Button>
-          </Link>
+          <Button to="/people" variant="secondary" size="sm">Back to People</Button>
         </div>
-      </div>
+      </PageState>
     );
   }
 
-  if (!profileUser) {
+  if (!profileUser || error?.status === 404) {
     return (
       <div className="py-12 max-w-xl mx-auto">
         <EmptyState
-          title="Student not found"
+          heading="h1" title="Student not found"
           description="The requested student profile could not be found or does not exist."
           actionLabel="Browse People"
           onAction={() => navigate('/people')}
@@ -82,18 +80,18 @@ export default function PublicProfilePage() {
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Profile Header Card */}
-      <Card className="p-8">
+      <Card className="sm:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-2xl font-bold text-white shadow-sm">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+            <div aria-hidden="true" className="flex size-12 shrink-0 sm:size-20 items-center justify-center rounded-2xl bg-indigo-600 text-2xl font-bold text-white shadow-sm">
               {initials}
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900" data-testid="profile-name">
+              <h1 tabIndex={-1} className="text-2xl font-bold tracking-tight text-slate-900" data-testid="profile-name">
                 {profileUser.fullName}
               </h1>
               {profileUser.college && (
-                <p className="text-sm font-medium text-slate-600 mt-0.5">
+                <p className="text-sm font-medium text-slate-700 mt-0.5">
                   {profileUser.college.name}
                 </p>
               )}
@@ -104,7 +102,7 @@ export default function PublicProfilePage() {
                   </Badge>
                 )}
                 {profileUser.createdAt && (
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-700">
                     Member since {formatDate(profileUser.createdAt)}
                   </span>
                 )}
@@ -115,13 +113,9 @@ export default function PublicProfilePage() {
           {/* Profile Actions */}
           <div className="flex items-center gap-3 self-start sm:self-center">
             {isOwnProfile ? (
-              <Link to="/profile/edit">
-                <Button variant="secondary" size="md">
-                  Edit Profile
-                </Button>
-              </Link>
+              <Button to="/profile/edit" variant="secondary" size="md">Edit Profile</Button>
             ) : (
-              <Button variant="primary" size="md" onClick={() => setExchangeDialogOpen(true)}>
+              <Button variant="primary" size="md" aria-haspopup="dialog" onClick={() => setExchangeDialogOpen(true)}>
                 Request skill exchange
               </Button>
             )}
@@ -143,7 +137,7 @@ export default function PublicProfilePage() {
                   {profileUser.bio}
                 </p>
               ) : (
-                <p className="text-sm italic text-slate-400">No biography provided yet.</p>
+                <p className="text-sm italic text-slate-700">No biography provided yet.</p>
               )}
             </CardContent>
           </Card>
@@ -155,17 +149,16 @@ export default function PublicProfilePage() {
             </CardHeader>
             <CardContent>
               {profileUser.skills && profileUser.skills.length > 0 ? (
-                <div className="flex flex-wrap gap-2.5">
+                <ul role="list" className="flex flex-wrap gap-2.5">
                   {profileUser.skills.map((item) => (
-                    <SkillBadge
-                      key={item.skill?.id || item.skill?.name}
+                    <li key={item.skill?.id || item.skill?.name}><SkillBadge
                       skill={item.skill}
                       level={item.level}
-                    />
+                    /></li>
                   ))}
-                </div>
+                </ul>
               ) : (
-                <p className="text-sm italic text-slate-400">No skills listed yet.</p>
+                <p className="text-sm italic text-slate-700">No skills listed yet.</p>
               )}
             </CardContent>
           </Card>
@@ -177,15 +170,15 @@ export default function PublicProfilePage() {
             </CardHeader>
             <CardContent>
               {profileUser.learningGoals && profileUser.learningGoals.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <ul role="list" className="flex flex-wrap gap-2">
                   {profileUser.learningGoals.map((goal) => (
-                    <Badge key={goal.id} variant="INFO" size="md">
+                    <li key={goal.id}><Badge variant="INFO" size="md">
                       {goal.name}
-                    </Badge>
+                    </Badge></li>
                   ))}
-                </div>
+                </ul>
               ) : (
-                <p className="text-sm italic text-slate-400">No learning goals listed yet.</p>
+                <p className="text-sm italic text-slate-700">No learning goals listed yet.</p>
               )}
             </CardContent>
           </Card>
@@ -200,15 +193,15 @@ export default function PublicProfilePage() {
             </CardHeader>
             <CardContent>
               {profileUser.interests && profileUser.interests.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <ul role="list" className="flex flex-wrap gap-2">
                   {profileUser.interests.map((interest) => (
-                    <Badge key={interest.id} variant="DEFAULT" size="md">
+                    <li key={interest.id}><Badge variant="DEFAULT" size="md">
                       {interest.name}
-                    </Badge>
+                    </Badge></li>
                   ))}
-                </div>
+                </ul>
               ) : (
-                <p className="text-sm italic text-slate-400">No interests listed.</p>
+                <p className="text-sm italic text-slate-700">No interests listed.</p>
               )}
             </CardContent>
           </Card>
@@ -220,17 +213,17 @@ export default function PublicProfilePage() {
             </CardHeader>
             <CardContent>
               {profileUser.links && profileUser.links.length > 0 ? (
-                <ul className="space-y-3">
+                <ul role="list" className="space-y-3">
                   {profileUser.links.map((link) => (
                     <li key={link.type} className="flex flex-col text-xs">
-                      <span className="font-semibold text-slate-500 uppercase tracking-wider mb-0.5">
+                      <span className="font-semibold text-slate-700 uppercase tracking-wider mb-0.5">
                         {link.type}
                       </span>
                       <a
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-indigo-600 hover:text-indigo-800 hover:underline truncate"
+                        className="text-indigo-700 hover:text-indigo-800 hover:underline truncate"
                       >
                         {link.url}
                       </a>
@@ -238,7 +231,7 @@ export default function PublicProfilePage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm italic text-slate-400">No links added.</p>
+                <p className="text-sm italic text-slate-700">No links added.</p>
               )}
             </CardContent>
           </Card>

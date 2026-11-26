@@ -1,16 +1,18 @@
 import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import ErrorBanner from './ErrorBanner.jsx';
+import PageState from './PageState.jsx';
 import Spinner from './Spinner.jsx';
 
 export default function ProtectedRoute({ children }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, sessionError, refetchUser } = useAuth();
   const location = useLocation();
 
-  if (isLoading) {
+  if (isLoading || (!user && sessionError)) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center p-8">
-        <Spinner size="lg" className="text-indigo-600" />
-      </div>
+      <PageState title="Checking your session">
+        {isLoading ? <Spinner size="lg" /> : <ErrorBanner error={sessionError} onRetry={refetchUser} />}
+      </PageState>
     );
   }
 

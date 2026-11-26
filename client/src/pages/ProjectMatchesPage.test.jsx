@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getProjectMatches } from '../api/matches.js';
@@ -49,7 +49,7 @@ describe('ProjectMatchesPage', () => {
     expect(screen.getByRole('meter', { name: /Skill level/ })).toHaveAttribute('value', '50');
     expect(screen.getByRole('meter', { name: /Fills a gap/ })).toHaveAttribute('value', '100');
     expect(screen.getByRole('meter', { name: /Wants to learn/ })).toHaveAttribute('value', '33.3');
-    expect(screen.getAllByRole('listitem').map((reason) => reason.textContent)).toEqual(['Knows React', 'Wants to learn CSS']);
+    expect(within(screen.getByRole('list', { name: 'Match reasons' })).getAllByRole('listitem').map((reason) => reason.textContent)).toEqual(['Knows React', 'Wants to learn CSS']);
     expect(getProjectMatches).toHaveBeenCalledWith('project-1');
   });
 

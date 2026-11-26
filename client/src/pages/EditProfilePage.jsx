@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../components/Toast.jsx';
@@ -8,10 +7,14 @@ import { fieldErrorsFromApiError } from '../api/client.js';
 import { getLookups } from '../api/lookups.js';
 import Card, { CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/Card.jsx';
 import Button from '../components/Button.jsx';
+import Select from '../components/Select.jsx';
+import EmptyState from '../components/EmptyState.jsx';
 import Input from '../components/Input.jsx';
 import Spinner from '../components/Spinner.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
 import SkillPicker from '../components/SkillPicker.jsx';
+import PageState from '../components/PageState.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const LINK_TYPES = [
   { value: 'github', label: 'GitHub' },
@@ -20,7 +23,12 @@ const LINK_TYPES = [
   { value: 'other', label: 'Other' },
 ];
 
+function retrySave(event) {
+  event.currentTarget.form.requestSubmit();
+}
+
 export default function EditProfilePage() {
+  usePageTitle('Edit profile');
   const { user: authUser } = useAuth();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -31,7 +39,7 @@ export default function EditProfilePage() {
     else if (toast?.toast) toast.toast({ message: msg, type: 'success' });
   };
 
-  const userId = authUser?.id || 1;
+  const userId = authUser?.id;
 
   // 1. Fetch current profile data
   const {
@@ -42,10 +50,11 @@ export default function EditProfilePage() {
   } = useQuery({
     queryKey: ['user', userId],
     queryFn: () => getUserById(userId),
+    enabled: Boolean(userId),
   });
 
   // 2. Fetch lookups
-  const { data: lookups, error: lookupsError, refetch: refetchLookups } = useQuery({
+  const { data: lookups, isLoading: lookupsLoading, error: lookupsError, refetch: refetchLookups } = useQuery({
     queryKey: ['lookups'],
     queryFn: getLookups,
   });
@@ -63,6 +72,7 @@ export default function EditProfilePage() {
   const [links, setLinks] = useState([]);
   const [isSavingLinks, setIsSavingLinks] = useState(false);
   const [errorLinks, setErrorLinks] = useState(null);
+  const [linkFieldErrors, setLinkFieldErrors] = useState({});
 
   // --- Section 3: Interests State ---
   const [selectedInterestIds, setSelectedInterestIds] = useState([]);
@@ -95,26 +105,28 @@ export default function EditProfilePage() {
 
   if (isProfileLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20" data-testid="edit-profile-loading">
+      <PageState title="Edit profile">
         <Spinner size="lg" />
-        <p className="mt-4 text-sm text-slate-500">Loading your profile settings...</p>
-      </div>
+      </PageState>
     );
   }
 
   if (profileError) {
     return (
-      <div className="max-w-xl mx-auto py-12 space-y-4">
+      <PageState title="Edit profile">
         <ErrorBanner error={profileError} onRetry={() => refetch()} />
-      </div>
+      </PageState>
     );
   }
+
+  if (!profileUser) return <EmptyState heading="h1" title="Profile unavailable" actionLabel="Retry" onAction={refetch} />;
 
   // --- Handlers for independent saving ---
 
   // Section 1: Basic Info
   const handleSaveBasic = async (e) => {
     e.preventDefault();
+    if (isSavingBasic) return;
     setIsSavingBasic(true);
     setErrorBasic(null);
     setBasicFieldErrors({});
@@ -150,13 +162,16 @@ export default function EditProfilePage() {
   };
 
   const handleRemoveLink = (index) => {
+    setLinkFieldErrors({});
     setLinks(links.filter((_, idx) => idx !== index));
   };
 
   const handleSaveLinks = async (e) => {
     e.preventDefault();
+    if (isSavingLinks) return;
     setIsSavingLinks(true);
     setErrorLinks(null);
+    setLinkFieldErrors({});
 
     try {
       const validLinks = links.filter((l) => l.url.trim().length > 0);
@@ -164,7 +179,11 @@ export default function EditProfilePage() {
       queryClient.invalidateQueries({ queryKey: ['user', userId] });
       notifySuccess('Profile links saved successfully');
     } catch (err) {
-      setErrorLinks(err.message || 'Failed to update links.');
+      const fieldErrors = fieldErrorsFromApiError(err);
+      setLinkFieldErrors(fieldErrors);
+      if (!Object.keys(fieldErrors).some((key) => /^links\.\d+\.(type|url)$/.test(key))) {
+        setErrorLinks(err.message || 'Failed to update links.');
+      }
     } finally {
       setIsSavingLinks(false);
     }
@@ -182,6 +201,7 @@ export default function EditProfilePage() {
 
   const handleSaveInterests = async (e) => {
     e.preventDefault();
+    if (isSavingInterests) return;
     setIsSavingInterests(true);
     setErrorInterests(null);
 
@@ -199,6 +219,7 @@ export default function EditProfilePage() {
   // Section 4: Known Skills
   const handleSaveSkills = async (e) => {
     e.preventDefault();
+    if (isSavingSkills) return;
     setIsSavingSkills(true);
     setErrorSkills(null);
 
@@ -221,6 +242,7 @@ export default function EditProfilePage() {
   // Section 5: Learning Goals
   const handleSaveGoals = async (e) => {
     e.preventDefault();
+    if (isSavingGoals) return;
     setIsSavingGoals(true);
     setErrorGoals(null);
 
@@ -246,15 +268,11 @@ export default function EditProfilePage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Edit Profile</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-700 mt-1">
             Manage your personal bio, availability, links, skills, and goals. Each section saves independently.
           </p>
         </div>
-        <Link to={`/users/${userId}`}>
-          <Button variant="secondary" size="md">
-            View Public Profile &rarr;
-          </Button>
-        </Link>
+        <Button to={`/users/${userId}`} variant="secondary" size="md">View Public Profile <span aria-hidden="true">&nbsp;&rarr;</span></Button>
       </div>
 
       {/* SECTION 1: Basic Information */}
@@ -264,88 +282,93 @@ export default function EditProfilePage() {
           <CardDescription>Update your public display name, college, and availability.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSaveBasic}>
-          <CardContent className="space-y-4">
-            {errorBasic && <ErrorBanner error={errorBasic} />}
-            {lookupsError && <ErrorBanner error={lookupsError} onRetry={() => refetchLookups()} />}
+          <fieldset disabled={isSavingBasic} className="min-w-0">
+            <CardContent className="space-y-4">
+              {errorBasic && <ErrorBanner error={errorBasic} onRetry={retrySave} />}
+              {lookupsError && <ErrorBanner error={lookupsError} onRetry={() => refetchLookups()} />}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                id="fullName"
-                name="fullName"
-                label="Full Name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                maxLength={80}
-                placeholder="Your full name"
-                error={basicFieldErrors.fullName}
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  label="Full Name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  maxLength={80}
+                  placeholder="Your full name"
+                  error={basicFieldErrors.fullName}
+                />
 
-              <div className="w-full space-y-1">
-                <label htmlFor="collegeId" className="block text-sm font-medium text-slate-700">
-                  College / University
-                </label>
-                <select
-                  id="collegeId"
-                  aria-invalid={Boolean(basicFieldErrors.collegeId)}
-                  value={collegeId}
-                  onChange={(e) => setCollegeId(e.target.value)}
-                  className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-2xs focus:border-indigo-500 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
-                >
-                  <option value="">Select your college...</option>
-                  {lookups?.colleges?.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                {basicFieldErrors.collegeId && <p role="alert" className="text-xs font-medium text-red-600">{basicFieldErrors.collegeId}</p>}
+                <div className="w-full space-y-1">
+                  <label htmlFor="collegeId" className="block text-sm font-medium text-slate-700">
+                    College / University
+                  </label>
+                  <select
+                    id="collegeId"
+                    aria-invalid={Boolean(basicFieldErrors.collegeId)}
+                    aria-describedby={basicFieldErrors.collegeId ? 'college-error' : undefined}
+                    disabled={lookupsLoading || Boolean(lookupsError)}
+                    value={collegeId}
+                    onChange={(e) => setCollegeId(e.target.value)}
+                    className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-2xs focus:border-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus:ring-1 focus:ring-indigo-500"
+                  >
+                    <option value="">{lookupsLoading ? 'Loading colleges…' : lookups?.colleges?.length ? 'Select your college…' : 'No colleges available'}</option>
+                    {lookups?.colleges?.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  {basicFieldErrors.collegeId && <p id="college-error" role="alert" className="text-xs font-medium text-red-700">{basicFieldErrors.collegeId}</p>}
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                id="weeklyHours"
-                name="weeklyHours"
-                type="number"
-                min={1}
-                max={80}
-                label="Weekly Hours Available"
-                hint="How many hours per week can you dedicate to projects or exchanges?"
-                value={weeklyHours}
-                onChange={(e) => setWeeklyHours(e.target.value)}
-                placeholder="e.g. 15"
-                error={basicFieldErrors.weeklyHours}
-              />
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label htmlFor="bio" className="block text-sm font-medium text-slate-700">
-                  Bio / About
-                </label>
-                <span className="text-2xs text-slate-400">{bio.length} / 500</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  id="weeklyHours"
+                  name="weeklyHours"
+                  type="number"
+                  min={1}
+                  max={80}
+                  label="Weekly Hours Available"
+                  hint="How many hours per week can you dedicate to projects or exchanges?"
+                  value={weeklyHours}
+                  onChange={(e) => setWeeklyHours(e.target.value)}
+                  placeholder="e.g. 15"
+                  error={basicFieldErrors.weeklyHours}
+                />
               </div>
-              <textarea
-                id="bio"
-                rows={3}
-                maxLength={500}
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                aria-invalid={Boolean(basicFieldErrors.bio)}
-                placeholder="Tell peers about your background, interests, and what you love building..."
-                className="block w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 shadow-2xs focus:border-indigo-500 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
-              />
-              {basicFieldErrors.bio && <p role="alert" className="text-xs font-medium text-red-600">{basicFieldErrors.bio}</p>}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <div className="ml-auto">
-              <Button type="submit" variant="primary" size="md" loading={isSavingBasic}>
-                Save Basic Info
-              </Button>
-            </div>
-          </CardFooter>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="bio" className="block text-sm font-medium text-slate-700">
+                    Bio / About
+                  </label>
+                  <span className="text-2xs text-slate-700">{bio.length} / 500</span>
+                </div>
+                <textarea
+                  id="bio"
+                  rows={3}
+                  maxLength={500}
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  aria-invalid={Boolean(basicFieldErrors.bio)}
+                  aria-describedby={basicFieldErrors.bio ? 'bio-error' : undefined}
+                  placeholder="Tell peers about your background, interests, and what you love building..."
+                  className="block w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 shadow-2xs focus:border-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus:ring-1 focus:ring-indigo-500"
+                />
+                {basicFieldErrors.bio && <p id="bio-error" role="alert" className="text-xs font-medium text-red-700">{basicFieldErrors.bio}</p>}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <div className="ml-auto">
+                <Button type="submit" variant="primary" size="md" loading={isSavingBasic}>
+                  Save Basic Info
+                </Button>
+              </div>
+            </CardFooter>
+          </fieldset>
         </form>
       </Card>
 
@@ -356,62 +379,44 @@ export default function EditProfilePage() {
           <CardDescription>Add links to your GitHub profile, LinkedIn, personal website, or portfolio (up to 4).</CardDescription>
         </CardHeader>
         <form onSubmit={handleSaveLinks}>
-          <CardContent className="space-y-4">
-            {errorLinks && <ErrorBanner error={errorLinks} />}
+          <fieldset disabled={isSavingLinks} className="min-w-0">
+            <CardContent className="space-y-4">
+              {errorLinks && <ErrorBanner error={errorLinks} onRetry={retrySave} />}
 
-            {links.length === 0 ? (
-              <p className="text-xs text-slate-500 italic">No external links added yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {links.map((link, idx) => (
-                  <div key={idx} className="flex flex-col sm:flex-row items-center gap-3">
-                    <select
-                      aria-label="Link platform type"
-                      value={link.type}
-                      onChange={(e) => handleLinkChange(idx, 'type', e.target.value)}
-                      className="w-full sm:w-36 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-2xs"
-                    >
-                      {LINK_TYPES.map((lt) => (
-                        <option key={lt.value} value={lt.value}>
-                          {lt.label}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="url"
-                      aria-label="Link URL"
-                      placeholder="https://..."
-                      value={link.url}
-                      onChange={(e) => handleLinkChange(idx, 'url', e.target.value)}
-                      className="flex-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-2xs"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveLink(idx)}
-                      className="shrink-0 text-slate-400 hover:text-red-600 p-2 text-sm font-semibold"
-                      aria-label="Remove link"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
+              {links.length === 0 ? (
+                <p className="text-xs text-slate-700 italic">No external links added yet.</p>
+              ) : (
+                <ul role="list" className="space-y-3">
+                  {links.map((link, idx) => (
+                    <li key={idx} className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                      <div className="sm:w-36 sm:shrink-0">
+                        <Select label="Link platform type" value={link.type} error={linkFieldErrors[`links.${idx}.type`]} onChange={(event) => handleLinkChange(idx, 'type', event.target.value)}>
+                          {LINK_TYPES.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
+                        </Select>
+                      </div>
+                      <Input label="Link URL" type="url" placeholder="https://..." value={link.url} error={linkFieldErrors[`links.${idx}.url`]} onChange={(event) => handleLinkChange(idx, 'url', event.target.value)} required />
+                      <button type="button" onClick={() => handleRemoveLink(idx)} className="shrink-0 self-start rounded p-2 text-sm font-semibold text-slate-700 hover:text-red-700 sm:mt-6" aria-label={`Remove link ${idx + 1}`}>
+                        <span aria-hidden="true">✕</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {links.length < 4 && (
+                <Button type="button" variant="secondary" size="sm" onClick={handleAddLink}>
+                  + Add Link
+                </Button>
+              )}
+            </CardContent>
+            <CardFooter>
+              <div className="ml-auto">
+                <Button type="submit" variant="primary" size="md" loading={isSavingLinks}>
+                  Save Links
+                </Button>
               </div>
-            )}
-
-            {links.length < 4 && (
-              <Button type="button" variant="secondary" size="sm" onClick={handleAddLink}>
-                + Add Link
-              </Button>
-            )}
-          </CardContent>
-          <CardFooter>
-            <div className="ml-auto">
-              <Button type="submit" variant="primary" size="md" loading={isSavingLinks}>
-                Save Links
-              </Button>
-            </div>
-          </CardFooter>
+            </CardFooter>
+          </fieldset>
         </form>
       </Card>
 
@@ -420,41 +425,46 @@ export default function EditProfilePage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>3. Interests</CardTitle>
-            <span className="text-xs text-slate-500">{selectedInterestIds.length} / 10 selected</span>
+            <span className="text-xs text-slate-700">{selectedInterestIds.length} / 10 selected</span>
           </div>
           <CardDescription>Select topic areas and technologies you are excited about.</CardDescription>
+          {lookupsError && <p className="text-sm text-slate-700">Interests are unavailable. Retry loading profile options above.</p>}
         </CardHeader>
         <form onSubmit={handleSaveInterests}>
-          <CardContent>
-            {errorInterests && <ErrorBanner error={errorInterests} className="mb-4" />}
+          <fieldset disabled={isSavingInterests} className="min-w-0">
+            <CardContent>
+              {errorInterests && <ErrorBanner error={errorInterests} onRetry={retrySave} className="mb-4" />}
 
-            <div className="flex flex-wrap gap-2">
-              {lookups?.interests?.map((interest) => {
-                const isSelected = selectedInterestIds.includes(interest.id);
-                return (
-                  <button
-                    key={interest.id}
-                    type="button"
-                    onClick={() => handleToggleInterest(interest.id)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors cursor-pointer ${
-                      isSelected
-                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-semibold'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                    }`}
-                  >
-                    {interest.name} {isSelected && '✓'}
-                  </button>
-                );
-              })}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <div className="ml-auto">
-              <Button type="submit" variant="primary" size="md" loading={isSavingInterests}>
-                Save Interests
-              </Button>
-            </div>
-          </CardFooter>
+              {lookupsLoading && <p role="status" className="text-sm text-slate-700">Loading interests…</p>}
+              {lookups && !lookups.interests?.length && <p className="text-sm text-slate-700">No interests are available.</p>}
+              <ul role="list" className="flex flex-wrap gap-2">
+                {lookups?.interests?.map((interest) => {
+                  const isSelected = selectedInterestIds.includes(interest.id);
+                  return (
+                    <li key={interest.id}><button
+                      aria-pressed={isSelected}
+                      type="button"
+                      onClick={() => handleToggleInterest(interest.id)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-semibold'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      {interest.name} {isSelected && <span aria-hidden="true">✓</span>}
+                    </button></li>
+                  );
+                })}
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <div className="ml-auto">
+                <Button type="submit" variant="primary" size="md" loading={isSavingInterests} disabled={!lookups?.interests?.length}>
+                  Save Interests
+                </Button>
+              </div>
+            </CardFooter>
+          </fieldset>
         </form>
       </Card>
 
@@ -467,25 +477,27 @@ export default function EditProfilePage() {
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSaveSkills}>
-          <CardContent>
-            {errorSkills && <ErrorBanner error={errorSkills} className="mb-4" />}
+          <fieldset disabled={isSavingSkills} className="min-w-0">
+            <CardContent>
+              {errorSkills && <ErrorBanner error={errorSkills} onRetry={retrySave} className="mb-4" />}
 
-            <SkillPicker
-              label="Select and add skills with proficiency level"
-              value={skills}
-              onChange={setSkills}
-              withLevel={true}
-              excludedSkillIds={learningGoalIds}
-              maxItems={30}
-            />
-          </CardContent>
-          <CardFooter>
-            <div className="ml-auto">
-              <Button type="submit" variant="primary" size="md" loading={isSavingSkills}>
-                Save Skills
-              </Button>
-            </div>
-          </CardFooter>
+              <SkillPicker
+                label="Select and add skills with proficiency level"
+                value={skills}
+                onChange={setSkills}
+                withLevel={true}
+                excludedSkillIds={learningGoalIds}
+                maxItems={30}
+              />
+            </CardContent>
+            <CardFooter>
+              <div className="ml-auto">
+                <Button type="submit" variant="primary" size="md" loading={isSavingSkills}>
+                  Save Skills
+                </Button>
+              </div>
+            </CardFooter>
+          </fieldset>
         </form>
       </Card>
 
@@ -498,25 +510,27 @@ export default function EditProfilePage() {
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSaveGoals}>
-          <CardContent>
-            {errorGoals && <ErrorBanner error={errorGoals} className="mb-4" />}
+          <fieldset disabled={isSavingGoals} className="min-w-0">
+            <CardContent>
+              {errorGoals && <ErrorBanner error={errorGoals} onRetry={retrySave} className="mb-4" />}
 
-            <SkillPicker
-              label="Select skills you want to learn"
-              value={learningGoals}
-              onChange={setLearningGoals}
-              withLevel={false}
-              excludedSkillIds={knownSkillIds}
-              maxItems={15}
-            />
-          </CardContent>
-          <CardFooter>
-            <div className="ml-auto">
-              <Button type="submit" variant="primary" size="md" loading={isSavingGoals}>
-                Save Learning Goals
-              </Button>
-            </div>
-          </CardFooter>
+              <SkillPicker
+                label="Select skills you want to learn"
+                value={learningGoals}
+                onChange={setLearningGoals}
+                withLevel={false}
+                excludedSkillIds={knownSkillIds}
+                maxItems={15}
+              />
+            </CardContent>
+            <CardFooter>
+              <div className="ml-auto">
+                <Button type="submit" variant="primary" size="md" loading={isSavingGoals}>
+                  Save Learning Goals
+                </Button>
+              </div>
+            </CardFooter>
+          </fieldset>
         </form>
       </Card>
     </div>

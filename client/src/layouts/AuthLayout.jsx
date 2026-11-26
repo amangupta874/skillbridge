@@ -1,16 +1,18 @@
 import { Outlet, Link, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
+import PageState from '../components/PageState.jsx';
 import Spinner from '../components/Spinner.jsx';
 
 export default function AuthLayout() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, sessionError, refetchUser } = useAuth();
   const location = useLocation();
 
-  if (isLoading) {
+  if (isLoading || (!user && sessionError)) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8">
-        <Spinner size="lg" className="text-indigo-600" />
-      </div>
+      <PageState title="Checking your session">
+        {isLoading ? <Spinner size="lg" /> : <ErrorBanner error={sessionError} onRetry={refetchUser} />}
+      </PageState>
     );
   }
 
@@ -20,14 +22,11 @@ export default function AuthLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="text-3xl font-extrabold text-indigo-600 tracking-tight">
+        <Link to="/" className="text-3xl font-extrabold text-indigo-700 tracking-tight">
           SkillBridge
         </Link>
-        <p className="mt-2 text-sm text-slate-600">
-          Student collaboration, peer skill exchange & team discovery
-        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
@@ -35,6 +34,6 @@ export default function AuthLayout() {
           <Outlet />
         </div>
       </div>
-    </div>
+    </main>
   );
 }

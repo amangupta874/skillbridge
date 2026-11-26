@@ -8,24 +8,28 @@ export default function NotificationList({ notifications }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const markRead = useMutation({
-    mutationFn: markNotificationRead,
+    mutationFn: (notification) => markNotificationRead(notification.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
+
+  function readAndOpen(notification) {
+    markRead.mutate(notification, { onSuccess: () => navigate(notification.link) });
+  }
 
   function openNotification(event, notification) {
     if (notification.isRead || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
     event.preventDefault();
     if (markRead.isPending) return;
 
-    markRead.mutate(notification.id, { onSuccess: () => navigate(notification.link) });
+    readAndOpen(notification);
   }
 
   return (
     <>
-      <ErrorBanner error={markRead.error} className="mb-3" />
-      <ul className="space-y-2">
+      <ErrorBanner error={markRead.error} onRetry={() => readAndOpen(markRead.variables)} className="mb-3" />
+      <ul role="list" className="space-y-2">
         {notifications.map((notification) => (
           <li key={notification.id}>
             <Link
@@ -34,7 +38,7 @@ export default function NotificationList({ notifications }) {
               className={`block rounded-lg border p-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${notification.isRead ? 'border-slate-200 bg-white hover:bg-slate-50' : 'border-indigo-200 bg-indigo-50 hover:bg-indigo-100'}`}
             >
               <span className={`block text-slate-900 ${notification.isRead ? '' : 'font-semibold'}`}>{notification.message}</span>
-              <span className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-slate-600">
+              <span className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-slate-700">
                 <time dateTime={notification.createdAt}>{formatRelativeTime(notification.createdAt)}</time>
                 {!notification.isRead && <span className="font-medium text-indigo-700">Unread</span>}
               </span>
