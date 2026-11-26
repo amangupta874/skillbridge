@@ -4,18 +4,18 @@ import Card from './Card.jsx';
 import SkillBadge from './SkillBadge.jsx';
 import { formatLabel } from '../utils/labels.js';
 
-export default function ProjectCard({ project }) {
+export default function ProjectCard({ project, heading: Heading = 'h2' }) {
   return (
     <Card className="flex h-full flex-col">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <p className="text-sm font-medium text-indigo-700">{project.category.name}</p>
         <Badge variant={project.status}>{formatLabel(project.status)}</Badge>
       </div>
-      <h2 className="mt-3 text-lg font-bold text-slate-900">
+      <Heading className="mt-3 text-lg font-bold text-slate-900">
         <Link to={`/projects/${project.id}`} className="rounded-sm hover:text-indigo-700 focus-visible:outline-2 focus-visible:outline-indigo-600">
           {project.title}
         </Link>
-      </h2>
+      </Heading>
       <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{project.summary}</p>
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <Badge variant={project.difficulty}>{formatLabel(project.difficulty)}</Badge>
