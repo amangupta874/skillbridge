@@ -16,10 +16,17 @@ Tick a task when its "done when" in docs/10_DAILY_PLAN.md is met and `npm run ve
 
 ## Notes per task (files, tests added, manual checks, issues)
 ### Live regression and documentation — 2026-11-26
-- **Live regression**: Used two fresh accounts, `regress-c@demo.skillbridge.test` and `regress-d@demo.skillbridge.test`, with a generated password kept in a shell variable. The full project, application, match, acceptance, notification, exchange, and logout flow matched the expected status codes and response assertions from `docs/05_API_SPEC.md`. See the task report for the status table. Demo-domain records are intentionally left in place for the seed cleanup.
+- **Live regression**: Used two fresh accounts, `regress-c@demo.skillbridge.test` and `regress-d@demo.skillbridge.test`, with a generated password kept in a shell variable. The status results were: health 200; frontend login page 200; both registrations 201; both skill replacements 200; project create 201; project list/detail 200; application create/list 201/200; matches 200; accept 200; accepted project detail and notifications/unread count 200; mark-all-read 200; unread count after read-all 200 with count 0; repeated accept 409; exchange create/accept/complete 201/200/200; A's notifications 200; both logouts 204; both `/auth/me` checks 401. Skill/lookup searches returned the catalogue records used by the requests. Membership/seats, positive match with reasons, accepted notification, zero unread count, exchange completion notification, and post-logout rejection assertions passed. Demo-domain records are intentionally left in place for seed cleanup.
 - **README**: Rewrote the root README from the current schema, route/module files, client routes, package manifests, CI workflow, and deployment/demo docs. Added live links, features, Mermaid architecture and 18-table ER diagrams, a normalization note, local setup, environment-variable reference, verified test counts, deployment and security summaries, demo links, limitations, screenshots placeholder, and AI acknowledgements.
 - **Verification**: Before editing, `npm ci`, `cd server && npx prisma generate`, and `npm run verify` passed on synced `main`: 175 server tests, 86 client tests, lint, and client build.
 - **Differences found while documenting**: The current route tree does not mount `/analytics/skill-demand`, despite the older API and frontend specifications describing it. The README therefore does not list analytics as an available feature. The frontend currently has no `/trends` route.
+- **Tests added**: None; this is documentation work.
+
+### API reference and server code tour — 2026-11-26
+- **Files created**: `docs/api.md` and `docs/CODE_TOUR.md`.
+- **API reference**: Documented the mounted routes from their route files, Zod schemas, controllers, services, and response helpers; included request limits, authorization, success/error shapes, examples, and spec/code differences.
+- **Code tour**: Covered all nine server feature modules, shared middleware/infrastructure, schema constraints, test setup, and 12 code-defence questions with answers tied to the implementation.
+- **Differences recorded**: `/analytics/skill-demand` is specified but not mounted; `details` is omitted from error JSON when undefined; `unread=false` is accepted by validation but the notification service currently returns all rows for that value.
 - **Tests added**: None; this is documentation work.
 
 ### Day 26 (Demo data and notes — 2026-11-17)
