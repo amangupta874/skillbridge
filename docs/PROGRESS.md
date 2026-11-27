@@ -1,6 +1,8 @@
 # PROGRESS (the agent updates this file at the end of every task and every day)
 
-Last verified: 2026-11-15, npm run verify passed        Live URL: https://skillbridge-seven-tau.vercel.app        API URL: https://skillbridge-6dhg.onrender.com        Repo: https://github.com/amangupta874/skillbridge.git
+Last verified: 2026-11-27, `npm run verify` PASS (175 server tests, 103 client tests, 278 total; lint and build passed). Live URL: https://skillbridge-seven-tau.vercel.app        API URL: https://skillbridge-6dhg.onrender.com        Repo: https://github.com/amangupta874/skillbridge.git
+
+Status: feature freeze, ready for Stage 2 evaluation.
 
 ## Status by day (tick when DONE per docs/10 "Done when")
 - [x] D1 setup, database, repository      - [ ] D2 auth backend              - [ ] D3 helpers, lookups, skills, client foundation
@@ -29,9 +31,15 @@ Day 8 projects backend completed on 2026-11-14. `npm run verify` passed with the
 (none)
 
 ## Known issues / risks
-(none)
+- `GET /api/analytics/skill-demand` and a trends page were not built. The `skill_demand_supply` SQL view and `docs/performance-notes.md` contain the data engineering analysis.
+- There is no password reset or email sending, and there is no admin role or admin panel.
+- Free hosting may sleep while idle.
+- No screenshots have been added.
+- `npm audit --omit=dev` reports 6 vulnerabilities (4 high, 2 moderate); available fixes require major upgrades beyond the pinned Prisma 6 and React Router 6 versions. See `docs/security-notes.md`.
 
 ## Verification log
 2026-11-03: npm run verify -> PASS (oxlint, eslint, vitest server 14/14, vitest client 3/3, vite build)
 
 2026-11-15: applications endpoints and row-lock decisions -> `npm run verify` PASS (105 server tests, 51 client tests, lint, build); all 20 last-seat concurrency rounds passed.
+
+2026-11-27: final cleanup -> `npm run verify` PASS (175 server tests, 103 client tests, lint, build); fresh-clone setup passed after adding the test database migration step to README.
