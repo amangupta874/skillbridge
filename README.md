@@ -191,6 +191,7 @@ Set `DATABASE_URL` in `server/.env` to the development database and in `server/.
 cd server
 npx prisma generate
 npx prisma migrate dev
+npx dotenv run -f .env.test -- prisma migrate deploy
 npm run db:seed
 cd ..
 npm run dev
@@ -223,7 +224,7 @@ The API reads `server/.env` for development and `server/.env.test` during tests.
 
 Server integration tests use Vitest, Supertest, and a real PostgreSQL test database. They cover routes, validation, authorization, state changes, notifications, and the simultaneous last-seat accept case. Client tests use Vitest and Testing Library. CI provisions PostgreSQL 16, generates the Prisma client, applies migrations, and runs `npm run verify` on pushes to `main` and pull requests.
 
-The verification run for this README revision found **175 server tests and 86 client tests (261 total)**; lint and the Vite production build also passed.
+The verification run for this README revision found **175 server tests and 103 client tests (278 total)**; lint and the Vite production build also passed.
 
 ## Deployment
 
@@ -244,6 +245,7 @@ See [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for the demo workflow and seeded 
 
 ## Known limitations
 
+- The `GET /api/analytics/skill-demand` endpoint and a trends page were **not built**. The `skill_demand_supply` SQL view and [docs/performance-notes.md](docs/performance-notes.md) cover the data engineering analysis.
 - There is no password reset or email sending.
 - Free hosting may sleep when idle.
 - There is no admin role or admin panel.
